@@ -425,9 +425,9 @@
             this.groupBox3.Controls.Add(this.metroLabel12);
             this.groupBox3.Controls.Add(this.metroLabel11);
             this.groupBox3.Controls.Add(this.metroLabel10);
-            this.groupBox3.Location = new System.Drawing.Point(9, 274);
+            this.groupBox3.Location = new System.Drawing.Point(467, 94);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(456, 171);
+            this.groupBox3.Size = new System.Drawing.Size(456, 181);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
             // 
@@ -518,18 +518,18 @@
             // 
             // metroButton1
             // 
-            this.metroButton1.Location = new System.Drawing.Point(10, 451);
+            this.metroButton1.Location = new System.Drawing.Point(926, 212);
             this.metroButton1.Name = "metroButton1";
-            this.metroButton1.Size = new System.Drawing.Size(456, 41);
+            this.metroButton1.Size = new System.Drawing.Size(201, 63);
             this.metroButton1.TabIndex = 6;
             this.metroButton1.Text = "Старт";
             this.metroButton1.UseSelectable = true;
             // 
             // metroButton2
             // 
-            this.metroButton2.Location = new System.Drawing.Point(10, 451);
+            this.metroButton2.Location = new System.Drawing.Point(926, 212);
             this.metroButton2.Name = "metroButton2";
-            this.metroButton2.Size = new System.Drawing.Size(264, 41);
+            this.metroButton2.Size = new System.Drawing.Size(201, 63);
             this.metroButton2.TabIndex = 7;
             this.metroButton2.Text = "Стоп";
             this.metroButton2.UseSelectable = true;
@@ -572,7 +572,7 @@
             this.metroGrid1.EnableHeadersVisualStyles = false;
             this.metroGrid1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.metroGrid1.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.metroGrid1.Location = new System.Drawing.Point(471, 94);
+            this.metroGrid1.Location = new System.Drawing.Point(9, 281);
             this.metroGrid1.Name = "metroGrid1";
             this.metroGrid1.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -585,7 +585,7 @@
             this.metroGrid1.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.metroGrid1.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             this.metroGrid1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.metroGrid1.Size = new System.Drawing.Size(763, 398);
+            this.metroGrid1.Size = new System.Drawing.Size(1118, 354);
             this.metroGrid1.TabIndex = 8;
             // 
             // Column1
@@ -642,7 +642,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1256, 501);
+            this.ClientSize = new System.Drawing.Size(1150, 650);
             this.Controls.Add(this.metroGrid1);
             this.Controls.Add(this.metroButton2);
             this.Controls.Add(this.metroButton1);
