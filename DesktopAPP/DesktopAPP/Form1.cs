@@ -300,13 +300,16 @@ namespace DesktopAPP
         {
 
             string param =
-                "-a " + prms.input_voltage_1
+                
+                "-j " + "1,2,3" +
+                " -a " + prms.input_voltage_1+","+prms.input_voltage_2+","+prms.input_voltage_3+","+prms.input_voltage_4   
                 + " -b " + prms.frequency
                 + " -e " + prms.start_mode
                 + " -f " + prms.pulse_type
                 + " -g " + prms.sync_type
                 + " -z " + prms.conn_type
                 + " -p " + fprefix
+                
                 + " -q " + datadir;
             param += " -ca " + i;
 
@@ -327,22 +330,25 @@ namespace DesktopAPP
 
         private void insert_entry(int i, Params prms)
         {
-           
-            var str = new SoapHexBinary(File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat")).ToString();
+
+            var str = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
 
             db_mtx.WaitOne();
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
-                
+
+           
+
             string insert_inf =
              "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data) " +
-            "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "','" + str + "');";
+            "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "', @vanya);";
             cmd.CommandText = insert_inf;
+            cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
             cmd.ExecuteNonQuery();
             UpdataMena();
             conn.Close();
             db_mtx.ReleaseMutex();
-            File.Delete(datadir + "/" + fprefix + i + ".dat");
+            //File.Delete(datadir + "/" + fprefix + i + ".dat");
 
 
 
@@ -405,6 +411,24 @@ namespace DesktopAPP
         {
             metroButton2.Visible = false;
             Interlocked.Exchange(ref computation_interrupt, 1);
+        }
+
+        private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int ind = metroGrid1.SelectedCells[0].RowIndex;
+            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+            metroGrid1.Rows.RemoveAt(ind);
+            conn.Open();
+            string delete = "DELETE FROM info_table WHERE id='" + id + "'";
+
+            SQLiteCommand cmd = new SQLiteCommand(delete, conn);
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
+
+        private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
