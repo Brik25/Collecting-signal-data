@@ -486,20 +486,64 @@ namespace DesktopAPP
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            conn.Open();
-            SQLiteCommand cmd = new SQLiteCommand();
-
             string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
-            cmd.CommandText = "SELECT data FROM info_table WHERE ID = "+id+"";
-
+            SQLiteCommand cmd = new SQLiteCommand("SELECT data FROM info_table WHERE ID = " + id + "",conn);
+         
+            conn.Open();
             using (var reader = cmd.ExecuteReader())
             {
+                
                 while (reader.Read())
                 {
+                    Params prms = get_params();
                     byte[] bindata = GetBytes(reader);
 
-                    
+                    const int numbytes = 2;
+                    byte[] buf = new byte[numbytes];
+                    List<List<double>> decnums = new List<List<double>>(4);
+                    for (int dmid = 0; dmid < 2; ++dmid)
+                    {
+                        decnums.Add(new List<double>());
+                    }
+                    short chanel = 0;
+                    for (int bdid = 0; bdid < bindata.Length; bdid++)
+                    {
+                        int j = bdid % numbytes;
+                        buf[j] = bindata[bdid];
+                        if (j == numbytes - 1)
+                        {
+                            if (chanel == 2)
+                                chanel = 0;
+                            decnums[chanel++].Add(BitConverter.ToInt16(buf, 0));
+                            //*a/8000
+                        }
+                    }
+
+                    StreamWriter file = new StreamWriter( "asdsadsad.txt");
+
+                    string delim = "\t";
+                    for (int dmid = 0; dmid < decnums.Count; ++dmid)
+                    {
+                        file.Write(Convert.ToString(dmid + 1) + delim);
+                    }
+                    file.WriteLine();
+                    for (int n = 0; n < decnums[0].Count - 1; ++n)
+                    {
+                        for (int j = 0; j < decnums.Count; ++j)
+                        {
+                            string ldelim = delim;
+                            if (j == decnums.Count - 1)
+                            {
+                                ldelim = "";
+                            }
+
+                            file.Write(Convert.ToString(decnums[j][n]) + ldelim);
+                        }
+                        file.WriteLine();
+                    }
+                    file.Flush();
+                    file.Close();
                 }
             }
         }
