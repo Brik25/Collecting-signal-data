@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
-using MetroFramework.Components;
 using MetroFramework.Forms;
 using System.IO;
-using System.Net;
 using System.Data.SQLite;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
+
 
 namespace DesktopAPP
 {
@@ -23,6 +16,7 @@ namespace DesktopAPP
     {
         int computation_interrupt = 0;
         int max_value;
+        string channels;
 
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
@@ -58,10 +52,7 @@ namespace DesktopAPP
 
             string sql_create =
 
-                         "CREATE TABLE Start (" +
-                            "idStart integer primary key, " +
-                            "start_name varchar(45) NOT NULL" +
-                         ");" +
+                         "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
                          "CREATE TABLE Napr (idNapr integer primary key, znach_nap integer NOT NULL);" +
                          "CREATE TABLE Impul (idImpul integer primary key, name_impu varchar(45) NOT NULL);" +
                          "CREATE TABLE Podkl (idPodkl integer primary key, name_podkl varchar(45) NOT NULL);" +
@@ -191,6 +182,9 @@ namespace DesktopAPP
             metroComboBox7.SelectedIndex = 0;
             metroComboBox8.SelectedIndex = 0;
             metroComboBox9.SelectedIndex = 1;
+            metroComboBox2.Enabled = false;
+            metroComboBox3.Enabled = false;
+            metroComboBox4.Enabled = false;
         }
 
         private Params get_params()
@@ -204,14 +198,10 @@ namespace DesktopAPP
                 prms.input_voltage_4 = metroComboBox4.SelectedIndex;
                 prms.frequency = metroComboBox5.Text;
                 prms.frequency2 = metroComboBox5.SelectedIndex;
-
-                //prms.chan_num = int.Parse(metroComboBox4.Text);
-
                 prms.start_mode = metroComboBox6.SelectedIndex;
                 prms.sync_type = metroComboBox7.SelectedIndex;
                 prms.pulse_type = metroComboBox8.SelectedIndex;
                 prms.conn_type = metroComboBox9.SelectedIndex;
-
                 prms.dac = Convert.ToInt32(metroTextBox1.Text); //Цап
                 prms.dac_step = Convert.ToInt32(numericUpDown1.Value); //шаг
             }));
@@ -296,20 +286,40 @@ namespace DesktopAPP
             }));
         }
 
+
         private void expirence(int i, Params prms)
         {
+            List<int> channel = new List<int>();
 
+
+            if (metroCheckBox1.Checked == true)
+                channel.Add(1);
+            if (metroCheckBox2.Checked == true)
+                channel.Add(2);
+            if (metroCheckBox3.Checked == true)
+                channel.Add(3);
+            if (metroCheckBox4.Checked == true)
+                channel.Add(4);
+
+
+            for (int j = 0; j < channel.Count; j++)
+            {
+                channels = string.Join(",", channel.ToArray());
+            }
+
+            this.Invoke(new Action(() =>
+            {
+                label1.Text = prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4;
+            }));
             string param =
-                
-                "-j " + "1,2,3" +
-                " -a " + prms.input_voltage_1+","+prms.input_voltage_2+","+prms.input_voltage_3+","+prms.input_voltage_4   
+                "-j " + channels
+                + " -a " + prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4
                 + " -b " + prms.frequency
                 + " -e " + prms.start_mode
                 + " -f " + prms.pulse_type
                 + " -g " + prms.sync_type
                 + " -z " + prms.conn_type
                 + " -p " + fprefix
-                
                 + " -q " + datadir;
             param += " -ca " + i;
 
@@ -326,7 +336,7 @@ namespace DesktopAPP
             new Task(() => insert_entry(i, prms)).Start();
 
         }
-       
+
 
         private void insert_entry(int i, Params prms)
         {
@@ -337,7 +347,7 @@ namespace DesktopAPP
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
-           
+
 
             string insert_inf =
              "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data) " +
@@ -369,7 +379,7 @@ namespace DesktopAPP
                 "name_Podkl," +
                 "name_impu," +
                 "Synch_name," +
-                "name " +    
+                "name " +
                 "FROM info_table,Napr,Impul,chast,Start,Syncho,Podkl " +
                 "WHERE info_table.Napr_IdNapr = Napr.idNapr " +
                 "AND info_table.Impul_idImpul = impul.idImpul " +
@@ -396,7 +406,7 @@ namespace DesktopAPP
                 data[data.Count - 1][5] = reader[5].ToString();
                 data[data.Count - 1][6] = reader[6].ToString();
                 data[data.Count - 1][7] = reader[7].ToString();
-                data[data.Count - 1][8] = reader[8].ToString();    
+                data[data.Count - 1][8] = reader[8].ToString();
             }
             // conn.Close();
             foreach (string[] s in data)
@@ -426,9 +436,89 @@ namespace DesktopAPP
             conn.Close();
         }
 
-        private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
+        private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
+            if (metroCheckBox1.Checked == true)
+            {
+                metroComboBox1.Enabled = true;
+            }
+            else
+            {
+                metroComboBox1.Enabled = false;
+            }
+        }
 
+        private void metroCheckBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox2.Checked == true)
+            {
+                metroComboBox2.Enabled = true;
+            }
+            else
+            {
+                metroComboBox2.Enabled = false;
+            }
+        }
+
+        private void metroCheckBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox3.Checked == true)
+            {
+                metroComboBox3.Enabled = true;
+            }
+            else
+            {
+                metroComboBox3.Enabled = false;
+            }
+        }
+
+        private void metroCheckBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox4.Checked == true)
+            {
+                metroComboBox4.Enabled = true;
+            }
+            else
+            {
+                metroComboBox4.Enabled = false;
+            }
+        }
+
+        private void графикToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            conn.Open();
+            SQLiteCommand cmd = new SQLiteCommand();
+
+            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+
+            cmd.CommandText = "SELECT data FROM info_table WHERE ID = "+id+"";
+
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    byte[] bindata = GetBytes(reader);
+
+                    
+                }
+            }
+        }
+
+        static byte[] GetBytes(SQLiteDataReader reader)
+        {
+            const int CHUNK_SIZE = 2 * 1024;
+            byte[] buffer = new byte[CHUNK_SIZE];
+            long bytesRead;
+            long fieldOffset = 0;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                while ((bytesRead = reader.GetBytes(0, fieldOffset, buffer, 0, buffer.Length)) > 0)
+                {
+                    stream.Write(buffer, 0, (int)bytesRead);
+                    fieldOffset += bytesRead;
+                }
+                return stream.ToArray();
+            }
         }
     }
 }
