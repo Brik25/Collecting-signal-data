@@ -263,14 +263,14 @@ namespace DesktopAPP
             Params prms = get_params();
 
 
-            if (metroRadioButton1.Checked)
+            if (metroCheckBox5.Enabled==false)
             {
 
                 int i = prms.dac;
                 expirence(i, prms);
 
             }
-            else if (metroRadioButton2.Checked)
+            else if (metroCheckBox5.Enabled == true)
             {
                 for (int i = prms.dac; i <= max_value; i += prms.dac_step)
                 {
@@ -307,10 +307,7 @@ namespace DesktopAPP
                 channels = string.Join(",", channel.ToArray());
             }
 
-            this.Invoke(new Action(() =>
-            {
-                label1.Text = prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4;
-            }));
+            
             string param =
                 "-j " + channels
                 + " -a " + prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4
@@ -562,6 +559,32 @@ namespace DesktopAPP
                     fieldOffset += bytesRead;
                 }
                 return stream.ToArray();
+            }
+        }
+
+        private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+       
+        }
+
+        private void metroCheckBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            if(metroCheckBox5.Checked == true)
+            {
+                metroCheckBox5.Text = "ON";
+                numericUpDown1.Value = 100;
+                numericUpDown1.Enabled = true;
+                metroLabel16.Visible = true;
+                metroLabel9.Visible = false;
+            }
+            else
+            {
+                metroCheckBox5.Text = "OFF";
+                numericUpDown1.Value = 0;
+                numericUpDown1.Enabled = false;
+                metroLabel16.Visible = false;
+                metroLabel9.Visible = true ;
+               
             }
         }
     }
