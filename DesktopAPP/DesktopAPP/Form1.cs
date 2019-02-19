@@ -16,7 +16,7 @@ namespace DesktopAPP
     {
         int computation_interrupt = 0;
         int max_value;
-      
+        int chan_num;
 
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
@@ -54,11 +54,15 @@ namespace DesktopAPP
             string sql_create =
 
                          "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
-                         "CREATE TABLE Napr (idNapr integer primary key, znach_nap integer NOT NULL);" +
+                         "CREATE TABLE Napr (idNapr integer primary key, znach_nap integer NOT NULL);" +  //del
                          "CREATE TABLE Impul (idImpul integer primary key, name_impu varchar(45) NOT NULL);" +
                          "CREATE TABLE Podkl (idPodkl integer primary key, name_podkl varchar(45) NOT NULL);" +
                          "CREATE TABLE Syncho (idSyncho integer primary key, synch_name varchar(45) NOT NULL);" +
                          "CREATE TABLE chast (idchast integer primary key, znach_chast integer NOT NULL);" +
+
+
+                        
+
 
                          "CREATE TABLE info_table (" +
                          "id integer primary key AUTOINCREMENT," +
@@ -71,7 +75,18 @@ namespace DesktopAPP
                          "chan_num integer NOT NULL,"+
                          "Cap integer NOT NULL," +
                          "name varchar(45) NOT NULL," +
-                         "data BLOB" +
+                         "data BLOB" +   // del
+
+
+                         //проверь связи
+                         // "channel_1 integere NOT NULL REFERENCES id_channel"+
+                         // "channel_2 integere NOT NULL REFERENCES id_channel"+
+                         // "channel_3 integere NOT NULL REFERENCES id_channel" +
+                         // "channel_4 integere NOT NULL REFERENCES id_channel);" +
+
+                         //"CREATE TABLE chast (id_chanel integer primary key , data BLOB NOT NULL,input_voltage intgere REFERENCES idvoltage);" +
+                         //"CREATE TABLE voltage(idvoltage integer primary key, value_voltage integer NOT NULL);" +
+
                          ");";
 
             cmd.CommandText = sql_create;
@@ -98,7 +113,14 @@ namespace DesktopAPP
                 //параметры типа подключения
                 "insert into Podkl(idPodkl,name_podkl) values (0,\"Заземленный канал АЦП модуля\");" +
                 "insert into Podkl(idPodkl,name_podkl) values (1,\"Подача выходного сигнала на вход АЦП модуля\");" +
-                //параметры входного напряжения
+                //параметры входного напряжения 
+
+                /*
+                "insert into voltage(idvoltage,value_voltage) values (0,3000);" +
+                "insert into voltage(idvoltage,value_voltage) values (1,1000);" +
+                "insert into voltage(idvoltage,value_voltage) values (2,300);" +
+                 */
+
                 "insert into Napr(idNapr,znach_nap) values (0,3000);" +
                 "insert into Napr(idNapr,znach_nap) values (1,1000);" +
                 "insert into Napr(idNapr,znach_nap) values (2,300);" +
@@ -124,6 +146,8 @@ namespace DesktopAPP
             }
             conn.Open();
 
+
+            //SQLiteCommand command_napr = new SQLiteCommand("select value_voltage from voltage", conn);
             SQLiteCommand command_napr = new SQLiteCommand("select znach_nap from Napr", conn);
             re = command_napr.ExecuteReader();
             while (re.Read())
@@ -276,7 +300,7 @@ namespace DesktopAPP
             Params prms = get_params();
 
 
-            if (metroCheckBox5.Checked==false)
+            if (metroCheckBox5.Checked==false || metroCheckBox6.Checked == true)
             {
 
                 int i = prms.dac;
@@ -302,6 +326,9 @@ namespace DesktopAPP
 
         private void expirence(int i, Params prms)
         {
+          
+
+
             string param =
                 "-j " + string.Join(",", prms.channels.ConvertAll(el => el.ToString()).ToArray())
                 + " -a " + prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4
@@ -341,14 +368,47 @@ namespace DesktopAPP
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
 
+            if (metroCheckBox5.Enabled == true)
+            {
+                string insert_inf =
 
-            string insert_inf =
-             "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data,chan_num) " +
-            "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "', @vanya,"+ prms.channels.Count + ");";
-            cmd.CommandText = insert_inf;
-            cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
-            cmd.ExecuteNonQuery();
+                 //тут сам оформи запрос     
+                 "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data,chan_num) " +
+                "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "', @vanya," + prms.channels.Count + ");";
+                cmd.CommandText = insert_inf;
+                cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
+                cmd.ExecuteNonQuery();
+            } else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
+            {
+                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
+
+                string update =
+                "UPDATE info_table " +
+                "SET Napr_idNapr ='" + prms.input_voltage_1 + "'," +
+                "Impul_idImpul='" + prms.pulse_type + "'," +
+                "chast_idchast='" + prms.frequency2 + "'," +
+                "Start_idStart='" + prms.start_mode + "'," +
+                "Syncho_idSyncho='" + prms.sync_type + "'," +
+                "Podkl_idPodkl='" + prms.conn_type + "'," +
+                "Cap='" + i + "'," +
+                "name='" + fprefix + i +"',"+
+                "data=@vanya,"+
+                "chan_num='" + prms.channels.Count +"' " +
+                "WHERE id='" + id + "'";
+                cmd.CommandText = update;
+                
+                cmd.ExecuteNonQuery();
+                this.Invoke(new Action(() =>
+                {
+                    metroCheckBox6.Checked = false;
+                    metroCheckBox5.Enabled = true;
+                }));
+               
+            }
+
             UpdataMena();
+
             conn.Close();
             db_mtx.ReleaseMutex();
             //File.Delete(datadir + "/" + fprefix + i + ".dat");
@@ -477,7 +537,9 @@ namespace DesktopAPP
             }
         }
 
-        int chan_num;
+        
+
+      
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -502,12 +564,12 @@ namespace DesktopAPP
 
             using (var reader = cmd.ExecuteReader())
             {
-                
+
                 while (reader.Read())
                 {
                     Params prms = get_params();
-                    byte[] bindata = GetBytes(reader);
-
+                    byte[] bindata = GetBytes(reader); 
+                    
                     const int numbytes = 2;
                     byte[] buf = new byte[numbytes];
                     List<List<double>> decnums = new List<List<double>>(chan_num);
@@ -516,7 +578,7 @@ namespace DesktopAPP
                         decnums.Add(new List<double>());
                     }
                     short chanel = 0;
-                    for (int bdid = 0; bdid < bindata.Length; bdid++)
+                    for (int bdid = 5; bdid < bindata.Length; bdid++)
                     {
                         int j = bdid % numbytes;
                         buf[j] = bindata[bdid];
@@ -524,8 +586,8 @@ namespace DesktopAPP
                         {
                             if (chanel == chan_num)
                                 chanel = 0;
-                            decnums[chanel++].Add(BitConverter.ToInt16(buf, 0));
-                            //*a/8000
+                            double val = BitConverter.ToInt16(buf, 0);
+                            decnums[chanel++].Add(val);
                         }
                     }
 
@@ -577,7 +639,11 @@ namespace DesktopAPP
 
         private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-       
+            metroCheckBox6.Checked = true;
+            metroCheckBox5.Enabled = false;
+            new Thread(() => run_calculate()).Start();
+
+
         }
 
         private void metroCheckBox5_CheckedChanged(object sender, EventArgs e)
