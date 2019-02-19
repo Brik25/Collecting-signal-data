@@ -525,7 +525,7 @@ namespace DesktopAPP
                             if (chanel == chan_num)
                                 chanel = 0;
                             decnums[chanel++].Add(BitConverter.ToInt16(buf, 0));
-                            
+                            //*a/8000
                         }
                     }
 
