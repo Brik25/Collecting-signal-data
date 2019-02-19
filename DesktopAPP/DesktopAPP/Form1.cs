@@ -16,7 +16,7 @@ namespace DesktopAPP
     {
         int computation_interrupt = 0;
         int max_value;
-        string channels;
+      
 
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
@@ -41,6 +41,7 @@ namespace DesktopAPP
             public int input_voltage_4;
             public string frequency;
             public int frequency2;
+            public List<int> channels;
 
 
         }
@@ -67,6 +68,7 @@ namespace DesktopAPP
                          "Start_idStart integer NOT NULL REFERENCES Start(idStart)," +
                          "Syncho_idSyncho integer NOT NULL REFERENCES Syncho(idSyncho)," +
                          "Podkl_idPodkl integer NOT NULL  REFERENCES Podkl(idPodkl)," +
+                         "chan_num integer NOT NULL,"+
                          "Cap integer NOT NULL," +
                          "name varchar(45) NOT NULL," +
                          "data BLOB" +
@@ -204,6 +206,17 @@ namespace DesktopAPP
                 prms.conn_type = metroComboBox9.SelectedIndex;
                 prms.dac = Convert.ToInt32(metroTextBox1.Text); //Цап
                 prms.dac_step = Convert.ToInt32(numericUpDown1.Value); //шаг
+
+                prms.channels = new List<int>();
+
+                if (metroCheckBox1.Checked == true)
+                    prms.channels.Add(1);
+                if (metroCheckBox2.Checked == true)
+                    prms.channels.Add(2);
+                if (metroCheckBox3.Checked == true)
+                    prms.channels.Add(3);
+                if (metroCheckBox4.Checked == true)
+                    prms.channels.Add(4);
             }));
 
             return prms;
@@ -263,14 +276,14 @@ namespace DesktopAPP
             Params prms = get_params();
 
 
-            if (metroCheckBox5.Enabled==false)
+            if (metroCheckBox5.Checked==false)
             {
 
                 int i = prms.dac;
                 expirence(i, prms);
 
             }
-            else if (metroCheckBox5.Enabled == true)
+            else if (metroCheckBox5.Checked == true)
             {
                 for (int i = prms.dac; i <= max_value; i += prms.dac_step)
                 {
@@ -289,27 +302,8 @@ namespace DesktopAPP
 
         private void expirence(int i, Params prms)
         {
-            List<int> channel = new List<int>();
-
-
-            if (metroCheckBox1.Checked == true)
-                channel.Add(1);
-            if (metroCheckBox2.Checked == true)
-                channel.Add(2);
-            if (metroCheckBox3.Checked == true)
-                channel.Add(3);
-            if (metroCheckBox4.Checked == true)
-                channel.Add(4);
-
-
-            for (int j = 0; j < channel.Count; j++)
-            {
-                channels = string.Join(",", channel.ToArray());
-            }
-
-            
             string param =
-                "-j " + channels
+                "-j " + string.Join(",", prms.channels.ConvertAll(el => el.ToString()).ToArray())
                 + " -a " + prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4
                 + " -b " + prms.frequency
                 + " -e " + prms.start_mode
@@ -319,6 +313,8 @@ namespace DesktopAPP
                 + " -p " + fprefix
                 + " -q " + datadir;
             param += " -ca " + i;
+
+            Console.WriteLine(param);
 
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
@@ -337,7 +333,7 @@ namespace DesktopAPP
 
         private void insert_entry(int i, Params prms)
         {
-
+            
             var str = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
 
             db_mtx.WaitOne();
@@ -347,8 +343,8 @@ namespace DesktopAPP
 
 
             string insert_inf =
-             "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data) " +
-            "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "', @vanya);";
+             "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data,chan_num) " +
+            "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "', @vanya,"+ prms.channels.Count + ");";
             cmd.CommandText = insert_inf;
             cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
             cmd.ExecuteNonQuery();
@@ -481,13 +477,29 @@ namespace DesktopAPP
             }
         }
 
+        int chan_num;
+
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
         {
+           
             string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
             SQLiteCommand cmd = new SQLiteCommand("SELECT data FROM info_table WHERE ID = " + id + "",conn);
-         
+
+            
+
+
             conn.Open();
+
+            SQLiteCommand chan_val = new SQLiteCommand("select chan_num from info_table WHERE ID = " + id + "", conn);
+            re = chan_val.ExecuteReader();
+            while (re.Read())
+            {
+                string a = re.GetValue(0).ToString();
+                chan_num = Convert.ToInt32(a);
+               
+            }
+
             using (var reader = cmd.ExecuteReader())
             {
                 
@@ -498,8 +510,8 @@ namespace DesktopAPP
 
                     const int numbytes = 2;
                     byte[] buf = new byte[numbytes];
-                    List<List<double>> decnums = new List<List<double>>(4);
-                    for (int dmid = 0; dmid < 2; ++dmid)
+                    List<List<double>> decnums = new List<List<double>>(chan_num);
+                    for (int dmid = 0; dmid < chan_num; ++dmid)
                     {
                         decnums.Add(new List<double>());
                     }
@@ -510,10 +522,10 @@ namespace DesktopAPP
                         buf[j] = bindata[bdid];
                         if (j == numbytes - 1)
                         {
-                            if (chanel == 2)
+                            if (chanel == chan_num)
                                 chanel = 0;
                             decnums[chanel++].Add(BitConverter.ToInt16(buf, 0));
-                            //*a/8000
+                            
                         }
                     }
 
@@ -543,6 +555,7 @@ namespace DesktopAPP
                     file.Close();
                 }
             }
+            conn.Close();
         }
 
         static byte[] GetBytes(SQLiteDataReader reader)
