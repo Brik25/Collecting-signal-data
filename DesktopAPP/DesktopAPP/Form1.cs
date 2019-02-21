@@ -369,7 +369,6 @@ namespace DesktopAPP
             {
                 string insert_file_sql =
                 "insert into info_table (" +
-
                 "   Impul_idImpul," +
                 "   chast_idchast," +
                 "   Start_idStart," +
@@ -408,8 +407,43 @@ namespace DesktopAPP
 
             } else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
             {
-               
-               
+                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                string update_file_sql =
+                    "UPDATE info_table SET " +
+                    "impul_idImpul='" + prms.pulse_type + "'," +
+                    "chast_idchast='" + prms.frequency2 + "'," +
+                    "Start_idStart='" + prms.start_mode + "'," +
+                    "Syncho_idSyncho='" + prms.sync_type + "'," +
+                    "Podkl_idPodkl='" + prms.conn_type + "'," +
+                    "Cap='" + i + "','" +
+                    "name='" + fprefix + i + "'," +
+                    "chan_num='" + prms.channels.Count + "' " +
+                    "WHERE id ='" + id + "'";
+                cmd.CommandText = update_file_sql;
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "select file from channel join info_table ON channel.file =info_table.id WHERE id ="+id+"'";
+                long file_id = (long)cmd.ExecuteScalar();
+
+                for (int n = 0; n < prms.channels.Count; ++n)
+                {
+                    string upload_sql_up =
+                        "UPDATE channel SET" +
+                        "data=@vanya, " +
+                        "num='" + prms.channels[n] + "'," +
+                        "file='" + file_id + "'," +
+                        "input_voltage='" + prms.input_voltage[prms.channels[n] - 1]+"'";
+                        
+                    cmd.CommandText = upload_sql_up;
+                    byte[] channel_data = channels_data[n].ToArray();
+                    cmd.Parameters.Add("@vanya", DbType.Binary, channel_data.Length).Value = channel_data;
+                    cmd.ExecuteNonQuery();
+                    this.Invoke(new Action(() =>
+                    {
+                        metroCheckBox6.Checked = false;
+                        metroCheckBox5.Enabled = true;
+                    }));
+                }
             }
 
             UpdataMena();
