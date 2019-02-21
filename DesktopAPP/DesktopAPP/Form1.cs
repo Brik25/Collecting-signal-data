@@ -49,7 +49,7 @@ namespace DesktopAPP
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
             string sql_create =
-                         "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +                         
+                         "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
                          "CREATE TABLE Impul (idImpul integer primary key, name_impu varchar(45) NOT NULL);" +
                          "CREATE TABLE Podkl (idPodkl integer primary key, name_podkl varchar(45) NOT NULL);" +
                          "CREATE TABLE Syncho (idSyncho integer primary key, synch_name varchar(45) NOT NULL);" +
@@ -68,7 +68,7 @@ namespace DesktopAPP
                          "name varchar(45) NOT NULL" +
                          ");" +
 
-                         
+
                          "CREATE TABLE channel (" +
                          "code integer primary key AUTOINCREMENT," +
                          "data BLOB NOT NULL," +
@@ -76,7 +76,7 @@ namespace DesktopAPP
                          "file integer REFERENCES info_table(id)," +
                          "input_voltage integer REFERENCES input_voltage(code)" +
                          ");";
-                     
+
 
             cmd.CommandText = sql_create;
             cmd.ExecuteNonQuery();
@@ -105,7 +105,7 @@ namespace DesktopAPP
                 //параметры входного напряжения      
                 "insert into input_voltage(code,value) values (0,3000);" +
                 "insert into input_voltage(code,value) values (1,1000);" +
-                "insert into input_voltage(code,value) values (2,300);" +        
+                "insert into input_voltage(code,value) values (2,300);" +
                 //параметры частоты работы
                 "insert into chast(idchast,znach_chast) values (0,1000);" +
                 "insert into chast(idchast,znach_chast) values (1,2000);" +
@@ -194,7 +194,74 @@ namespace DesktopAPP
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
         }
+        private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox1.Checked == true)
+            {
+                metroComboBox1.Enabled = true;
+            }
+            else
+            {
+                metroComboBox1.Enabled = false;
+            }
+        }
 
+        private void metroCheckBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox2.Checked == true)
+            {
+                metroComboBox2.Enabled = true;
+            }
+            else
+            {
+                metroComboBox2.Enabled = false;
+            }
+        }
+
+        private void metroCheckBox3_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox3.Checked == true)
+            {
+                metroComboBox3.Enabled = true;
+            }
+            else
+            {
+                metroComboBox3.Enabled = false;
+            }
+        }
+
+        private void metroCheckBox4_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox4.Checked == true)
+            {
+                metroComboBox4.Enabled = true;
+            }
+            else
+            {
+                metroComboBox4.Enabled = false;
+            }
+        }
+
+        private void metroCheckBox5_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox5.Checked == true)
+            {
+                metroCheckBox5.Text = "ON";
+                numericUpDown1.Value = 100;
+                numericUpDown1.Enabled = true;
+                metroLabel16.Visible = true;
+                metroLabel9.Visible = false;
+            }
+            else
+            {
+                metroCheckBox5.Text = "OFF";
+                numericUpDown1.Value = 0;
+                numericUpDown1.Enabled = false;
+                metroLabel16.Visible = false;
+                metroLabel9.Visible = true;
+
+            }
+        }
         private Params get_params()
         {
             Params prms = new Params();
@@ -268,6 +335,43 @@ namespace DesktopAPP
             }
         }
 
+        private void metroButton2_Click(object sender, EventArgs e)
+        {
+            metroButton2.Visible = false;
+            Interlocked.Exchange(ref computation_interrupt, 1);
+        }
+
+        private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int ind = metroGrid1.SelectedCells[0].RowIndex;
+            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+            metroGrid1.Rows.RemoveAt(ind);
+            conn.Open();
+            string delete = "DELETE FROM info_table WHERE id='" + id + "';DELETE FROM channel WHERE file = '" + id + "'";
+
+            SQLiteCommand cmd = new SQLiteCommand(delete, conn);
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
+
+
+        private void графикToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            convert();
+        }
+
+        private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            metroCheckBox6.Checked = true;
+            metroCheckBox5.Enabled = false;
+            new Thread(() => run_calculate()).Start();
+        }
+
+        private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+           
+        }
+
         private void unlockGui(bool state)
         {
 
@@ -283,7 +387,7 @@ namespace DesktopAPP
             Params prms = get_params();
 
 
-            if (metroCheckBox5.Checked==false || metroCheckBox6.Checked == true)
+            if (metroCheckBox5.Checked == false || metroCheckBox6.Checked == true)
             {
 
                 int i = prms.dac;
@@ -306,10 +410,8 @@ namespace DesktopAPP
             }));
         }
 
-
         private void expirence(int i, Params prms)
         {
-          
 
             string param =
                 "-j " + string.Join(",", prms.channels.ConvertAll(el => el.ToString()).ToArray())
@@ -339,7 +441,6 @@ namespace DesktopAPP
 
         }
 
-
         private void insert_entry(int i, Params prms)
         {
             db_mtx.WaitOne();
@@ -364,7 +465,7 @@ namespace DesktopAPP
                     k = 0;
                 channels_data[k].Add(data[n]);
             }
-           
+
             if (metroCheckBox5.Enabled == true)
             {
                 string insert_file_sql =
@@ -405,56 +506,52 @@ namespace DesktopAPP
                     cmd.ExecuteNonQuery();
                 }
 
-            } else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
+            }
+            else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
             {
                 string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                string delete = "Delete FROM channel where file = " + id;
+                cmd.CommandText = delete;
+                cmd.ExecuteNonQuery();
+
                 string update_file_sql =
-                    "UPDATE info_table SET " +
-                    "impul_idImpul='" + prms.pulse_type + "'," +
-                    "chast_idchast='" + prms.frequency2 + "'," +
-                    "Start_idStart='" + prms.start_mode + "'," +
-                    "Syncho_idSyncho='" + prms.sync_type + "'," +
-                    "Podkl_idPodkl='" + prms.conn_type + "'," +
-                    "Cap='" + i + "','" +
-                    "name='" + fprefix + i + "'," +
-                    "chan_num='" + prms.channels.Count + "' " +
-                    "WHERE id ='" + id + "'";
+                                        "UPDATE info_table SET " +
+                                        "impul_idImpul='" + prms.pulse_type + "'," +
+                                        "chast_idchast='" + prms.frequency2 + "'," +
+                                        "Start_idStart='" + prms.start_mode + "'," +
+                                        "Syncho_idSyncho='" + prms.sync_type + "'," +
+                                        "Podkl_idPodkl='" + prms.conn_type + "'," +
+                                        "Cap='" + i + "'," +
+                                        "name='" + fprefix + i + "'," +
+                                        "chan_num='" + prms.channels.Count + "' " +
+                                        "WHERE id ='" + id + "'";
                 cmd.CommandText = update_file_sql;
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "select file from channel join info_table ON channel.file =info_table.id WHERE id ="+id+"'";
-                long file_id = (long)cmd.ExecuteScalar();
-
                 for (int n = 0; n < prms.channels.Count; ++n)
                 {
-                    string upload_sql_up =
-                        "UPDATE channel SET" +
-                        "data=@vanya, " +
-                        "num='" + prms.channels[n] + "'," +
-                        "file='" + file_id + "'," +
-                        "input_voltage='" + prms.input_voltage[prms.channels[n] - 1]+"'";
-                        
-                    cmd.CommandText = upload_sql_up;
+                    string upload_sql =
+                        "insert into channel (data, num, file, input_voltage) values (@vanya, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                    cmd.CommandText = upload_sql;
                     byte[] channel_data = channels_data[n].ToArray();
                     cmd.Parameters.Add("@vanya", DbType.Binary, channel_data.Length).Value = channel_data;
                     cmd.ExecuteNonQuery();
-                    this.Invoke(new Action(() =>
-                    {
-                        metroCheckBox6.Checked = false;
-                        metroCheckBox5.Enabled = true;
-                    }));
                 }
+
+                this.Invoke(new Action(() =>
+                {
+                    metroCheckBox6.Checked = false;
+                    metroCheckBox5.Enabled = true;
+                }));
             }
 
             UpdataMena();
-
             conn.Close();
             db_mtx.ReleaseMutex();
-            //File.Delete(datadir + "/" + fprefix + i + ".dat");
-
-
+            File.Delete(datadir + "/" + fprefix + i + ".dat");
 
         }
+
         private void UpdataMena()
         {
             this.Invoke(new Action(() =>
@@ -464,7 +561,6 @@ namespace DesktopAPP
 
             string inf =
                 "Select id," +
-                
                 "znach_chast," +
                 "Cap," +
                 "start_name," +
@@ -473,14 +569,12 @@ namespace DesktopAPP
                 "Synch_name," +
                 "name " +
                 "FROM info_table,Impul,chast,Start,Syncho,Podkl " +
-            
+
                 "where info_table.Impul_idImpul = impul.idImpul " +
                 "AND info_table.chast_idchast = chast.idchast " +
                 "AND info_table.Start_idStart = Start.idStart " +
                 "AND info_table.Syncho_idSyncho = Syncho.idSyncho " +
                 "AND info_table.Podkl_idPodkl = Podkl.idPodkl ";
-
-            //conn.Open();
 
             SQLiteCommand cmd = new SQLiteCommand(inf, conn);
             SQLiteDataReader reader = cmd.ExecuteReader();
@@ -498,9 +592,7 @@ namespace DesktopAPP
                 data[data.Count - 1][5] = reader[5].ToString();
                 data[data.Count - 1][6] = reader[6].ToString();
                 data[data.Count - 1][7] = reader[7].ToString();
-                //data[data.Count - 1][8] = reader[8].ToString();
             }
-            // conn.Close();
             foreach (string[] s in data)
                 this.Invoke(new Action(() =>
                 {
@@ -509,92 +601,22 @@ namespace DesktopAPP
             metroGrid1.ClearSelection();
         }
 
-        private void metroButton2_Click(object sender, EventArgs e)
-        {
-            metroButton2.Visible = false;
-            Interlocked.Exchange(ref computation_interrupt, 1);
-        }
-
-        private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            int ind = metroGrid1.SelectedCells[0].RowIndex;
-            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-            metroGrid1.Rows.RemoveAt(ind);
-            conn.Open();
-            string delete = "DELETE FROM info_table WHERE id='" + id + "'";
-
-            SQLiteCommand cmd = new SQLiteCommand(delete, conn);
-            cmd.ExecuteNonQuery();
-            conn.Close();
-        }
-
-        private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (metroCheckBox1.Checked == true)
+        private void convert()
             {
-                metroComboBox1.Enabled = true;
-            }
-            else
+            try
             {
-                metroComboBox1.Enabled = false;
-            }
-        }
+                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
-        private void metroCheckBox2_CheckedChanged(object sender, EventArgs e)
-        {
-            if (metroCheckBox2.Checked == true)
-            {
-                metroComboBox2.Enabled = true;
-            }
-            else
-            {
-                metroComboBox2.Enabled = false;
-            }
-        }
+                SQLiteCommand cmd = new SQLiteCommand(
+                    "SELECT data, input_voltage.value, num FROM channel " +
+                    "JOIN info_table ON channel.file = info_table.id " +
+                    "JOIN input_voltage ON channel.input_voltage = input_voltage.code " +
+                    "WHERE info_table.id = " + id, conn);
+                conn.Open();
 
-        private void metroCheckBox3_CheckedChanged(object sender, EventArgs e)
-        {
-            if (metroCheckBox3.Checked == true)
-            {
-                metroComboBox3.Enabled = true;
-            }
-            else
-            {
-                metroComboBox3.Enabled = false;
-            }
-        }
+                using (var reader = cmd.ExecuteReader())
+                {
 
-        private void metroCheckBox4_CheckedChanged(object sender, EventArgs e)
-        {
-            if (metroCheckBox4.Checked == true)
-            {
-                metroComboBox4.Enabled = true;
-            }
-            else
-            {
-                metroComboBox4.Enabled = false;
-            }
-        }
-
-        
-
-      
-
-        private void графикToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-           
-            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-
-            SQLiteCommand cmd = new SQLiteCommand(
-                "SELECT data, input_voltage.value, num FROM channel " +
-                "JOIN info_table ON channel.file = info_table.id " +
-                "JOIN input_voltage ON channel.input_voltage = input_voltage.code " +
-                "WHERE info_table.id = " + id , conn);
-            conn.Open();
-
-         using (var reader = cmd.ExecuteReader())
-            {
-                
                     List<List<double>> result = new List<List<double>>();
                     List<string> header = new List<string>();
 
@@ -616,7 +638,7 @@ namespace DesktopAPP
                             {
                                 bytenum = 0;
                                 double val = BitConverter.ToInt16(buf, 0);
-                                val = val * input_voltage/8000;
+                                val = val * input_voltage / 8000;
 
                                 decnums.Add(val);
                             }
@@ -628,8 +650,8 @@ namespace DesktopAPP
 
                     StreamWriter file = new StreamWriter("asdsadsad.txt");
 
-                string delim = "\t";
-                long minlength = long.MaxValue;
+                    string delim = "\t";
+                    long minlength = long.MaxValue;
                     for (int i = 0; i < result.Count; ++i)
                     {
                         if (result[i].Count < minlength)
@@ -639,7 +661,7 @@ namespace DesktopAPP
                     }
                     for (int i = 0; i < header.Count; ++i)
                     {
-                         file.Write(header[i] + delim);
+                        file.Write(header[i] + delim);
                     }
                     file.WriteLine();
                     for (int i = 0; i < minlength; ++i)
@@ -659,9 +681,14 @@ namespace DesktopAPP
                     }
                     file.Flush();
                     file.Close();
-                
+
+                }
+                conn.Close();
             }
-            conn.Close();
+            catch
+            {
+                MessageBox.Show("База данных пуста", "База данных пуста", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         static byte[] GetBytes(SQLiteDataReader reader)
@@ -681,34 +708,6 @@ namespace DesktopAPP
             }
         }
 
-        private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            metroCheckBox6.Checked = true;
-            metroCheckBox5.Enabled = false;
-            new Thread(() => run_calculate()).Start();
-
-
-        }
-
-        private void metroCheckBox5_CheckedChanged(object sender, EventArgs e)
-        {
-            if(metroCheckBox5.Checked == true)
-            {
-                metroCheckBox5.Text = "ON";
-                numericUpDown1.Value = 100;
-                numericUpDown1.Enabled = true;
-                metroLabel16.Visible = true;
-                metroLabel9.Visible = false;
-            }
-            else
-            {
-                metroCheckBox5.Text = "OFF";
-                numericUpDown1.Value = 0;
-                numericUpDown1.Enabled = false;
-                metroLabel16.Visible = false;
-                metroLabel9.Visible = true ;
-               
-            }
-        }
+        
     }
 }
