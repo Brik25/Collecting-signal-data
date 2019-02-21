@@ -35,10 +35,7 @@ namespace DesktopAPP
             public int pulse_type;
             public int sync_type;
             public int conn_type;
-            public int input_voltage_1;
-            public int input_voltage_2;
-            public int input_voltage_3;
-            public int input_voltage_4;
+            public int[] input_voltage;
             public string frequency;
             public int frequency2;
             public List<int> channels;
@@ -52,42 +49,34 @@ namespace DesktopAPP
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
             string sql_create =
-
-                         "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
-                         "CREATE TABLE Napr (idNapr integer primary key, znach_nap integer NOT NULL);" +  //del
+                         "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +                         
                          "CREATE TABLE Impul (idImpul integer primary key, name_impu varchar(45) NOT NULL);" +
                          "CREATE TABLE Podkl (idPodkl integer primary key, name_podkl varchar(45) NOT NULL);" +
                          "CREATE TABLE Syncho (idSyncho integer primary key, synch_name varchar(45) NOT NULL);" +
                          "CREATE TABLE chast (idchast integer primary key, znach_chast integer NOT NULL);" +
-
-
-                        
-
+                         "CREATE TABLE input_voltage (code integer primary key, value integer NOT NULL);" +
 
                          "CREATE TABLE info_table (" +
                          "id integer primary key AUTOINCREMENT," +
-                         "Napr_idNapr integer NOT NULL REFERENCES Napr(idNapr)," +
                          "Impul_idImpul integer NOT NULL REFERENCES Impul(idImpul)," +
                          "chast_idchast integer NOT NULL REFERENCES chast(idchast)," +
                          "Start_idStart integer NOT NULL REFERENCES Start(idStart)," +
                          "Syncho_idSyncho integer NOT NULL REFERENCES Syncho(idSyncho)," +
-                         "Podkl_idPodkl integer NOT NULL  REFERENCES Podkl(idPodkl)," +
-                         "chan_num integer NOT NULL,"+
+                         "Podkl_idPodkl integer NOT NULL REFERENCES Podkl(idPodkl)," +
+                         "chan_num integer NOT NULL," +
                          "Cap integer NOT NULL," +
-                         "name varchar(45) NOT NULL," +
-                         "data BLOB" +   // del
+                         "name varchar(45) NOT NULL" +
+                         ");" +
 
-
-                         //проверь связи
-                         // "channel_1 integere NOT NULL REFERENCES id_channel"+
-                         // "channel_2 integere NOT NULL REFERENCES id_channel"+
-                         // "channel_3 integere NOT NULL REFERENCES id_channel" +
-                         // "channel_4 integere NOT NULL REFERENCES id_channel);" +
-
-                         //"CREATE TABLE chast (id_chanel integer primary key , data BLOB NOT NULL,input_voltage intgere REFERENCES idvoltage);" +
-                         //"CREATE TABLE voltage(idvoltage integer primary key, value_voltage integer NOT NULL);" +
-
+                         
+                         "CREATE TABLE channel (" +
+                         "code integer primary key AUTOINCREMENT," +
+                         "data BLOB NOT NULL," +
+                         "num integer NOT NULL," +
+                         "file integer REFERENCES info_table(id)," +
+                         "input_voltage integer REFERENCES input_voltage(code)" +
                          ");";
+                     
 
             cmd.CommandText = sql_create;
             cmd.ExecuteNonQuery();
@@ -113,17 +102,10 @@ namespace DesktopAPP
                 //параметры типа подключения
                 "insert into Podkl(idPodkl,name_podkl) values (0,\"Заземленный канал АЦП модуля\");" +
                 "insert into Podkl(idPodkl,name_podkl) values (1,\"Подача выходного сигнала на вход АЦП модуля\");" +
-                //параметры входного напряжения 
-
-                /*
-                "insert into voltage(idvoltage,value_voltage) values (0,3000);" +
-                "insert into voltage(idvoltage,value_voltage) values (1,1000);" +
-                "insert into voltage(idvoltage,value_voltage) values (2,300);" +
-                 */
-
-                "insert into Napr(idNapr,znach_nap) values (0,3000);" +
-                "insert into Napr(idNapr,znach_nap) values (1,1000);" +
-                "insert into Napr(idNapr,znach_nap) values (2,300);" +
+                //параметры входного напряжения      
+                "insert into input_voltage(code,value) values (0,3000);" +
+                "insert into input_voltage(code,value) values (1,1000);" +
+                "insert into input_voltage(code,value) values (2,300);" +        
                 //параметры частоты работы
                 "insert into chast(idchast,znach_chast) values (0,1000);" +
                 "insert into chast(idchast,znach_chast) values (1,2000);" +
@@ -148,7 +130,7 @@ namespace DesktopAPP
 
 
             //SQLiteCommand command_napr = new SQLiteCommand("select value_voltage from voltage", conn);
-            SQLiteCommand command_napr = new SQLiteCommand("select znach_nap from Napr", conn);
+            SQLiteCommand command_napr = new SQLiteCommand("select value from input_voltage", conn);
             re = command_napr.ExecuteReader();
             while (re.Read())
             {
@@ -216,12 +198,13 @@ namespace DesktopAPP
         private Params get_params()
         {
             Params prms = new Params();
+            prms.input_voltage = new int[4];
             this.Invoke(new Action(() =>
             {
-                prms.input_voltage_1 = metroComboBox1.SelectedIndex;
-                prms.input_voltage_2 = metroComboBox2.SelectedIndex;
-                prms.input_voltage_3 = metroComboBox3.SelectedIndex;
-                prms.input_voltage_4 = metroComboBox4.SelectedIndex;
+                prms.input_voltage[0] = metroComboBox1.SelectedIndex;
+                prms.input_voltage[1] = metroComboBox2.SelectedIndex;
+                prms.input_voltage[2] = metroComboBox3.SelectedIndex;
+                prms.input_voltage[3] = metroComboBox4.SelectedIndex;
                 prms.frequency = metroComboBox5.Text;
                 prms.frequency2 = metroComboBox5.SelectedIndex;
                 prms.start_mode = metroComboBox6.SelectedIndex;
@@ -328,10 +311,9 @@ namespace DesktopAPP
         {
           
 
-
             string param =
                 "-j " + string.Join(",", prms.channels.ConvertAll(el => el.ToString()).ToArray())
-                + " -a " + prms.input_voltage_1 + "," + prms.input_voltage_2 + "," + prms.input_voltage_3 + "," + prms.input_voltage_4
+                + " -a " + prms.input_voltage[0] + "," + prms.input_voltage[1] + "," + prms.input_voltage[2] + "," + prms.input_voltage[3]
                 + " -b " + prms.frequency
                 + " -e " + prms.start_mode
                 + " -f " + prms.pulse_type
@@ -360,50 +342,73 @@ namespace DesktopAPP
 
         private void insert_entry(int i, Params prms)
         {
-            
-            var str = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
-
             db_mtx.WaitOne();
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
 
+            var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
+            List<byte>[] channels_data = new List<byte>[prms.channels.Count];
+            for (int n = 0; n < prms.channels.Count; ++n)
+            {
+                channels_data[n] = new List<byte>();
+            }
+            for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
+            {
+                if (m == 2)
+                {
+                    ++k;
+                    m = 0;
+                }
+                if (k == prms.channels.Count)
+                    k = 0;
+                channels_data[k].Add(data[n]);
+            }
+           
             if (metroCheckBox5.Enabled == true)
             {
-                string insert_inf =
+                string insert_file_sql =
+                "insert into info_table (" +
 
-                 //тут сам оформи запрос     
-                 "insert into info_table (Napr_idNapr,Impul_idImpul,chast_idchast,Start_idStart,Syncho_idSyncho,Podkl_idPodkl,Cap,name,data,chan_num) " +
-                "values (" + prms.input_voltage_1 + "," + prms.pulse_type + "," + prms.frequency2 + "," + prms.start_mode + "," + prms.sync_type + "," + prms.conn_type + "," + i + ",'" + fprefix + i + "', @vanya," + prms.channels.Count + ");";
-                cmd.CommandText = insert_inf;
-                cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
+                "   Impul_idImpul," +
+                "   chast_idchast," +
+                "   Start_idStart," +
+                "   Syncho_idSyncho," +
+                "   Podkl_idPodkl," +
+                "   Cap," +
+                "   name," +
+                "   chan_num) " +
+                "values (" +
+
+                prms.pulse_type + "," +
+                prms.frequency2 + "," +
+                prms.start_mode + "," +
+                prms.sync_type + "," +
+                prms.conn_type + "," +
+                i + ",'" +
+                fprefix + i + "'," +
+                prms.channels.Count +
+                ");";
+
+                cmd.CommandText = insert_file_sql;
                 cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "select last_insert_rowid()";
+                long file_id = (long)cmd.ExecuteScalar();
+
+                for (int n = 0; n < prms.channels.Count; ++n)
+                {
+                    string upload_sql =
+                        "insert into channel (data, num, file, input_voltage) values (@vanya, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                    cmd.CommandText = upload_sql;
+                    byte[] channel_data = channels_data[n].ToArray();
+                    cmd.Parameters.Add("@vanya", DbType.Binary, channel_data.Length).Value = channel_data;
+                    cmd.ExecuteNonQuery();
+                }
+
             } else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
             {
-                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-                cmd.Parameters.Add("@vanya", DbType.Binary, str.Length).Value = str;
-
-                string update =
-                "UPDATE info_table " +
-                "SET Napr_idNapr ='" + prms.input_voltage_1 + "'," +
-                "Impul_idImpul='" + prms.pulse_type + "'," +
-                "chast_idchast='" + prms.frequency2 + "'," +
-                "Start_idStart='" + prms.start_mode + "'," +
-                "Syncho_idSyncho='" + prms.sync_type + "'," +
-                "Podkl_idPodkl='" + prms.conn_type + "'," +
-                "Cap='" + i + "'," +
-                "name='" + fprefix + i +"',"+
-                "data=@vanya,"+
-                "chan_num='" + prms.channels.Count +"' " +
-                "WHERE id='" + id + "'";
-                cmd.CommandText = update;
-                
-                cmd.ExecuteNonQuery();
-                this.Invoke(new Action(() =>
-                {
-                    metroCheckBox6.Checked = false;
-                    metroCheckBox5.Enabled = true;
-                }));
+               
                
             }
 
@@ -425,7 +430,7 @@ namespace DesktopAPP
 
             string inf =
                 "Select id," +
-                "znach_nap," +
+                
                 "znach_chast," +
                 "Cap," +
                 "start_name," +
@@ -433,9 +438,9 @@ namespace DesktopAPP
                 "name_impu," +
                 "Synch_name," +
                 "name " +
-                "FROM info_table,Napr,Impul,chast,Start,Syncho,Podkl " +
-                "WHERE info_table.Napr_IdNapr = Napr.idNapr " +
-                "AND info_table.Impul_idImpul = impul.idImpul " +
+                "FROM info_table,Impul,chast,Start,Syncho,Podkl " +
+            
+                "where info_table.Impul_idImpul = impul.idImpul " +
                 "AND info_table.chast_idchast = chast.idchast " +
                 "AND info_table.Start_idStart = Start.idStart " +
                 "AND info_table.Syncho_idSyncho = Syncho.idSyncho " +
@@ -449,7 +454,7 @@ namespace DesktopAPP
 
             while (reader.Read())
             {
-                data.Add(new string[9]);
+                data.Add(new string[8]);
 
                 data[data.Count - 1][0] = reader[0].ToString();
                 data[data.Count - 1][1] = reader[1].ToString();
@@ -459,7 +464,7 @@ namespace DesktopAPP
                 data[data.Count - 1][5] = reader[5].ToString();
                 data[data.Count - 1][6] = reader[6].ToString();
                 data[data.Count - 1][7] = reader[7].ToString();
-                data[data.Count - 1][8] = reader[8].ToString();
+                //data[data.Count - 1][8] = reader[8].ToString();
             }
             // conn.Close();
             foreach (string[] s in data)
@@ -546,76 +551,81 @@ namespace DesktopAPP
            
             string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
-            SQLiteCommand cmd = new SQLiteCommand("SELECT data FROM info_table WHERE ID = " + id + "",conn);
-
-            
-
-
+            SQLiteCommand cmd = new SQLiteCommand(
+                "SELECT data, input_voltage.value, num FROM channel " +
+                "JOIN info_table ON channel.file = info_table.id " +
+                "JOIN input_voltage ON channel.input_voltage = input_voltage.code " +
+                "WHERE info_table.id = " + id , conn);
             conn.Open();
 
-            SQLiteCommand chan_val = new SQLiteCommand("select chan_num from info_table WHERE ID = " + id + "", conn);
-            re = chan_val.ExecuteReader();
-            while (re.Read())
+         using (var reader = cmd.ExecuteReader())
             {
-                string a = re.GetValue(0).ToString();
-                chan_num = Convert.ToInt32(a);
-               
-            }
+                
+                    List<List<double>> result = new List<List<double>>();
+                    List<string> header = new List<string>();
 
-            using (var reader = cmd.ExecuteReader())
-            {
+                    while (reader.Read())
+                    {
+                        long input_voltage = (long)reader.GetValue(1);
+                        List<double> decnums = new List<double>();
 
-                while (reader.Read())
-                {
-                    Params prms = get_params();
-                    byte[] bindata = GetBytes(reader); 
-                    
-                    const int numbytes = 2;
-                    byte[] buf = new byte[numbytes];
-                    List<List<double>> decnums = new List<List<double>>(chan_num);
-                    for (int dmid = 0; dmid < chan_num; ++dmid)
-                    {
-                        decnums.Add(new List<double>());
-                    }
-                    short chanel = 0;
-                    for (int bdid = 5; bdid < bindata.Length; bdid++)
-                    {
-                        int j = bdid % numbytes;
-                        buf[j] = bindata[bdid];
-                        if (j == numbytes - 1)
+                        header.Add(reader.GetValue(2).ToString());
+
+                        byte[] bindata = GetBytes(reader);
+
+                        const int numbytes = 2;
+                        byte[] buf = new byte[numbytes];
+
+                        for (int i = 0, bytenum = 0; i < bindata.Length; ++i, ++bytenum)
                         {
-                            if (chanel == chan_num)
-                                chanel = 0;
-                            double val = BitConverter.ToInt16(buf, 0);
-                            decnums[chanel++].Add(val);
+                            if (bytenum == numbytes)
+                            {
+                                bytenum = 0;
+                                double val = BitConverter.ToInt16(buf, 0);
+                                val = val * input_voltage/8000;
+
+                                decnums.Add(val);
+                            }
+                            buf[bytenum] = bindata[i];
+                        }
+
+                        result.Add(decnums);
+                    }
+
+                    StreamWriter file = new StreamWriter("asdsadsad.txt");
+
+                string delim = "\t";
+                long minlength = long.MaxValue;
+                    for (int i = 0; i < result.Count; ++i)
+                    {
+                        if (result[i].Count < minlength)
+                        {
+                            minlength = result[i].Count;
                         }
                     }
-
-                    StreamWriter file = new StreamWriter( "asdsadsad.txt");
-
-                    string delim = "\t";
-                    for (int dmid = 0; dmid < decnums.Count; ++dmid)
+                    for (int i = 0; i < header.Count; ++i)
                     {
-                        file.Write(Convert.ToString(dmid + 1) + delim);
+                         file.Write(header[i] + delim);
                     }
                     file.WriteLine();
-                    for (int n = 0; n < decnums[0].Count - 1; ++n)
+                    for (int i = 0; i < minlength; ++i)
                     {
-                        for (int j = 0; j < decnums.Count; ++j)
+                        for (int j = 0; j < result.Count; ++j)
                         {
                             string ldelim = delim;
-                            if (j == decnums.Count - 1)
+                            if (j == result.Count - 1)
                             {
                                 ldelim = "";
                             }
 
-                            file.Write(Convert.ToString(decnums[j][n]) + ldelim);
+                            result[j][i].ToString("G");
+                            file.Write(Convert.ToString(result[j][i]) + ldelim);
                         }
                         file.WriteLine();
                     }
                     file.Flush();
                     file.Close();
-                }
+                
             }
             conn.Close();
         }

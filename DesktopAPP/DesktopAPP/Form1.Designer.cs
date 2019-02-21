@@ -67,6 +67,7 @@
             this.metroLabel7 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel6 = new MetroFramework.Controls.MetroLabel();
             this.metroTextBox1 = new MetroFramework.Controls.MetroTextBox();
+            this.metroCheckBox6 = new MetroFramework.Controls.MetroCheckBox();
             this.metroLabel12 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel5 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel13 = new MetroFramework.Controls.MetroLabel();
@@ -89,7 +90,6 @@
             this.удалитьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ипортToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.экспортToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.metroCheckBox6 = new MetroFramework.Controls.MetroCheckBox();
             this.metroTabControl1.SuspendLayout();
             this.metroTabPage1.SuspendLayout();
             this.metroTabPage2.SuspendLayout();
@@ -383,7 +383,7 @@
             // metroLabel9
             // 
             this.metroLabel9.AutoSize = true;
-            this.metroLabel9.Location = new System.Drawing.Point(302, 278);
+            this.metroLabel9.Location = new System.Drawing.Point(254, 273);
             this.metroLabel9.Name = "metroLabel9";
             this.metroLabel9.Size = new System.Drawing.Size(124, 19);
             this.metroLabel9.TabIndex = 11;
@@ -547,6 +547,17 @@
             this.metroTextBox1.UseSelectable = true;
             this.metroTextBox1.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.metroTextBox1.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
+            // 
+            // metroCheckBox6
+            // 
+            this.metroCheckBox6.AutoSize = true;
+            this.metroCheckBox6.Location = new System.Drawing.Point(194, 56);
+            this.metroCheckBox6.Name = "metroCheckBox6";
+            this.metroCheckBox6.Size = new System.Drawing.Size(28, 15);
+            this.metroCheckBox6.TabIndex = 9;
+            this.metroCheckBox6.Text = "_";
+            this.metroCheckBox6.UseSelectable = true;
+            this.metroCheckBox6.Visible = false;
             // 
             // metroLabel12
             // 
@@ -760,17 +771,6 @@
             this.экспортToolStripMenuItem.Name = "экспортToolStripMenuItem";
             this.экспортToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.экспортToolStripMenuItem.Text = "Экспорт";
-            // 
-            // metroCheckBox6
-            // 
-            this.metroCheckBox6.AutoSize = true;
-            this.metroCheckBox6.Location = new System.Drawing.Point(194, 56);
-            this.metroCheckBox6.Name = "metroCheckBox6";
-            this.metroCheckBox6.Size = new System.Drawing.Size(28, 15);
-            this.metroCheckBox6.TabIndex = 9;
-            this.metroCheckBox6.Text = "_";
-            this.metroCheckBox6.UseSelectable = true;
-            this.metroCheckBox6.Visible = false;
             // 
             // Form1
             // 
