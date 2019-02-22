@@ -8,7 +8,9 @@ using System.Threading;
 using MetroFramework.Forms;
 using System.IO;
 using System.Data.SQLite;
-
+using MathWorks.MATLAB.NET.Arrays;
+using MathWorks.MATLAB.NET.Utility;
+using read;
 
 namespace DesktopAPP
 {
@@ -16,7 +18,6 @@ namespace DesktopAPP
     {
         int computation_interrupt = 0;
         int max_value;
-        int chan_num;
 
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
@@ -42,6 +43,7 @@ namespace DesktopAPP
 
 
         }
+
         protected void init_db()
         {
             SQLiteConnection.CreateFile("test.db");
@@ -178,7 +180,6 @@ namespace DesktopAPP
             conn.Close();
         }
 
-
         private void Form1_Load(object sender, EventArgs e)
         {
             metroComboBox1.SelectedIndex = 0;
@@ -194,6 +195,7 @@ namespace DesktopAPP
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
         }
+
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (metroCheckBox1.Checked == true)
@@ -262,6 +264,7 @@ namespace DesktopAPP
 
             }
         }
+
         private Params get_params()
         {
             Params prms = new Params();
@@ -354,10 +357,29 @@ namespace DesktopAPP
             conn.Close();
         }
 
-
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            convert();
+           
+            new Thread((worker) => grapth()).Start();
+            void grapth()
+            {
+                this.Invoke(new Action(() =>
+                {
+                    this.unlockGui(false);
+                }));
+                string name = "Grpth";
+                convert(name);
+                ReadClass rc = new ReadClass();
+                MWCharArray mlfname = new MWCharArray(name+".txt");
+                rc.read(0, mlfname);
+                File.Delete("Grpth.txt");
+                this.Invoke(new Action(() =>
+                {
+                    metroButton2.Visible = false;
+                    this.unlockGui(true);
+                }));
+            }
+           
         }
 
         private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
@@ -369,7 +391,22 @@ namespace DesktopAPP
 
         private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            
            
+            this.Invoke(new Action(() =>
+            {
+                this.unlockGui(false);
+            }));
+           
+              string  name = "Эксперимент";
+            
+
+            convert(name);
+            this.Invoke(new Action(() =>
+            {
+                metroButton2.Visible = false;
+                this.unlockGui(true);
+            }));
         }
 
         private void unlockGui(bool state)
@@ -601,7 +638,7 @@ namespace DesktopAPP
             metroGrid1.ClearSelection();
         }
 
-        private void convert()
+        private void convert(string name)
             {
             try
             {
@@ -638,7 +675,7 @@ namespace DesktopAPP
                             {
                                 bytenum = 0;
                                 double val = BitConverter.ToInt16(buf, 0);
-                                val = val * input_voltage / 8000;
+                               // val = val * input_voltage / 8000;
 
                                 decnums.Add(val);
                             }
@@ -648,7 +685,7 @@ namespace DesktopAPP
                         result.Add(decnums);
                     }
 
-                    StreamWriter file = new StreamWriter("asdsadsad.txt");
+                    StreamWriter file = new StreamWriter(name+".txt");
 
                     string delim = "\t";
                     long minlength = long.MaxValue;
@@ -707,7 +744,5 @@ namespace DesktopAPP
                 return stream.ToArray();
             }
         }
-
-        
     }
 }
