@@ -2,7 +2,7 @@
 
 Версия, с возможностью хранения данных в БД,их извлечение и удобная реализция.
 
-.ddl
+.dll
 1.MetroFramework UI -- interface programm
 2.SQLite -- SQL
 3.MATLAB -- castom dll for plot
