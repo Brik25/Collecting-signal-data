@@ -75,12 +75,6 @@
             this.metroComboBox6 = new MetroFramework.Controls.MetroComboBox();
             this.metroButton1 = new MetroFramework.Controls.MetroButton();
             this.metroGrid1 = new MetroFramework.Controls.MetroGrid();
-            this.metroContextMenu1 = new MetroFramework.Controls.MetroContextMenu(this.components);
-            this.графикToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.переснятьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.удалитьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ипортToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.экспортToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -89,7 +83,11 @@
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label1 = new System.Windows.Forms.Label();
+            this.metroContextMenu1 = new MetroFramework.Controls.MetroContextMenu(this.components);
+            this.графикToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.переснятьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.удалитьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.экспортToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.metroTabControl1.SuspendLayout();
             this.metroTabPage1.SuspendLayout();
             this.metroTabPage2.SuspendLayout();
@@ -673,51 +671,6 @@
             this.metroGrid1.Size = new System.Drawing.Size(930, 357);
             this.metroGrid1.TabIndex = 8;
             // 
-            // metroContextMenu1
-            // 
-            this.metroContextMenu1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.графикToolStripMenuItem,
-            this.переснятьToolStripMenuItem,
-            this.удалитьToolStripMenuItem,
-            this.ипортToolStripMenuItem,
-            this.экспортToolStripMenuItem});
-            this.metroContextMenu1.Name = "metroContextMenu1";
-            this.metroContextMenu1.Size = new System.Drawing.Size(133, 114);
-            // 
-            // графикToolStripMenuItem
-            // 
-            this.графикToolStripMenuItem.Name = "графикToolStripMenuItem";
-            this.графикToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.графикToolStripMenuItem.Text = "График";
-            this.графикToolStripMenuItem.Click += new System.EventHandler(this.графикToolStripMenuItem_Click);
-            // 
-            // переснятьToolStripMenuItem
-            // 
-            this.переснятьToolStripMenuItem.Name = "переснятьToolStripMenuItem";
-            this.переснятьToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.переснятьToolStripMenuItem.Text = "Переснять";
-            this.переснятьToolStripMenuItem.Click += new System.EventHandler(this.переснятьToolStripMenuItem_Click);
-            // 
-            // удалитьToolStripMenuItem
-            // 
-            this.удалитьToolStripMenuItem.Name = "удалитьToolStripMenuItem";
-            this.удалитьToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.удалитьToolStripMenuItem.Text = "Удалить";
-            this.удалитьToolStripMenuItem.Click += new System.EventHandler(this.удалитьToolStripMenuItem_Click);
-            // 
-            // ипортToolStripMenuItem
-            // 
-            this.ипортToolStripMenuItem.Name = "ипортToolStripMenuItem";
-            this.ипортToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.ипортToolStripMenuItem.Text = "Ипорт";
-            // 
-            // экспортToolStripMenuItem
-            // 
-            this.экспортToolStripMenuItem.Name = "экспортToolStripMenuItem";
-            this.экспортToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.экспортToolStripMenuItem.Text = "Экспорт";
-            this.экспортToolStripMenuItem.Click += new System.EventHandler(this.экспортToolStripMenuItem_Click);
-            // 
             // Column1
             // 
             this.Column1.HeaderText = "Эксперемент_№";
@@ -766,25 +719,53 @@
             this.Column9.Name = "Column9";
             this.Column9.ReadOnly = true;
             // 
-            // label1
+            // metroContextMenu1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(553, 25);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 9;
-            this.label1.Text = "label1";
+            this.metroContextMenu1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.графикToolStripMenuItem,
+            this.переснятьToolStripMenuItem,
+            this.удалитьToolStripMenuItem,
+            this.экспортToolStripMenuItem});
+            this.metroContextMenu1.Name = "metroContextMenu1";
+            this.metroContextMenu1.Size = new System.Drawing.Size(181, 114);
+            // 
+            // графикToolStripMenuItem
+            // 
+            this.графикToolStripMenuItem.Name = "графикToolStripMenuItem";
+            this.графикToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.графикToolStripMenuItem.Text = "График";
+            this.графикToolStripMenuItem.Click += new System.EventHandler(this.графикToolStripMenuItem_Click);
+            // 
+            // переснятьToolStripMenuItem
+            // 
+            this.переснятьToolStripMenuItem.Name = "переснятьToolStripMenuItem";
+            this.переснятьToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.переснятьToolStripMenuItem.Text = "Переснять";
+            this.переснятьToolStripMenuItem.Click += new System.EventHandler(this.переснятьToolStripMenuItem_Click);
+            // 
+            // удалитьToolStripMenuItem
+            // 
+            this.удалитьToolStripMenuItem.Name = "удалитьToolStripMenuItem";
+            this.удалитьToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.удалитьToolStripMenuItem.Text = "Удалить";
+            this.удалитьToolStripMenuItem.Click += new System.EventHandler(this.удалитьToolStripMenuItem_Click);
+            // 
+            // экспортToolStripMenuItem
+            // 
+            this.экспортToolStripMenuItem.Name = "экспортToolStripMenuItem";
+            this.экспортToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.экспортToolStripMenuItem.Text = "Экспорт";
+            this.экспортToolStripMenuItem.Click += new System.EventHandler(this.экспортToolStripMenuItem_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1447, 441);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.metroGrid1);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "E20-10D";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.metroTabControl1.ResumeLayout(false);
             this.metroTabPage1.ResumeLayout(false);
@@ -803,7 +784,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.metroGrid1)).EndInit();
             this.metroContextMenu1.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -846,7 +826,6 @@
         private MetroFramework.Controls.MetroContextMenu metroContextMenu1;
         private System.Windows.Forms.ToolStripMenuItem переснятьToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem удалитьToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ипортToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem экспортToolStripMenuItem;
         private MetroFramework.Controls.MetroLabel metroLabel9;
         private MetroFramework.Controls.MetroTextBox metroTextBox2;
@@ -866,7 +845,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column7;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column9;
-        private System.Windows.Forms.Label label1;
     }
 }
 

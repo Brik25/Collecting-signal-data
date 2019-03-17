@@ -41,7 +41,6 @@ namespace DesktopAPP
             public int frequency2;
             public List<int> channels;
 
-
         }
 
         protected void init_db()
@@ -51,33 +50,32 @@ namespace DesktopAPP
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
             string sql_create =
-                         "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
-                         "CREATE TABLE Impul (idImpul integer primary key, name_impu varchar(45) NOT NULL);" +
-                         "CREATE TABLE Podkl (idPodkl integer primary key, name_podkl varchar(45) NOT NULL);" +
-                         "CREATE TABLE Syncho (idSyncho integer primary key, synch_name varchar(45) NOT NULL);" +
-                         "CREATE TABLE chast (idchast integer primary key, znach_chast integer NOT NULL);" +
-                         "CREATE TABLE input_voltage (code integer primary key, value integer NOT NULL);" +
+             "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
+             "CREATE TABLE Impul (idImpul integer primary key, name_impu varchar(45) NOT NULL);" +
+             "CREATE TABLE Podkl (idPodkl integer primary key, name_podkl varchar(45) NOT NULL);" +
+             "CREATE TABLE Syncho (idSyncho integer primary key, synch_name varchar(45) NOT NULL);" +
+             "CREATE TABLE chast (idchast integer primary key, znach_chast integer NOT NULL);" +
+             "CREATE TABLE input_voltage (code integer primary key, value integer NOT NULL);" +
 
-                         "CREATE TABLE info_table (" +
-                         "id integer primary key AUTOINCREMENT," +
-                         "Impul_idImpul integer NOT NULL REFERENCES Impul(idImpul)," +
-                         "chast_idchast integer NOT NULL REFERENCES chast(idchast)," +
-                         "Start_idStart integer NOT NULL REFERENCES Start(idStart)," +
-                         "Syncho_idSyncho integer NOT NULL REFERENCES Syncho(idSyncho)," +
-                         "Podkl_idPodkl integer NOT NULL REFERENCES Podkl(idPodkl)," +
-                         "chan_num integer NOT NULL," +
-                         "Cap integer NOT NULL," +
-                         "name varchar(45) NOT NULL" +
-                         ");" +
+             "CREATE TABLE info_table (" +
+             "id integer primary key AUTOINCREMENT," +
+             "Impul_idImpul integer NOT NULL REFERENCES Impul(idImpul)," +
+             "chast_idchast integer NOT NULL REFERENCES chast(idchast)," +
+             "Start_idStart integer NOT NULL REFERENCES Start(idStart)," +
+             "Syncho_idSyncho integer NOT NULL REFERENCES Syncho(idSyncho)," +
+             "Podkl_idPodkl integer NOT NULL REFERENCES Podkl(idPodkl)," +
+             "chan_num integer NOT NULL," +
+             "Cap integer NOT NULL," +
+             "name varchar(45) NOT NULL" +
+             ");" +
 
-
-                         "CREATE TABLE channel (" +
-                         "code integer primary key AUTOINCREMENT," +
-                         "data BLOB NOT NULL," +
-                         "num integer NOT NULL," +
-                         "file integer REFERENCES info_table(id)," +
-                         "input_voltage integer REFERENCES input_voltage(code)" +
-                         ");";
+             "CREATE TABLE channel (" +
+             "code integer primary key AUTOINCREMENT," +
+             "data BLOB NOT NULL," +
+             "num integer NOT NULL," +
+             "file integer REFERENCES info_table(id)," +
+             "input_voltage integer REFERENCES input_voltage(code)" +
+             ");";
 
 
             cmd.CommandText = sql_create;
@@ -85,35 +83,35 @@ namespace DesktopAPP
 
             string insert =
 
-                //параметры Режима старта
-                "insert into Start(idStart,start_name) values (0,\"Внутренний старт\");" +
-                "insert into Start(idStart,start_name) values (1,\"Внутренний старт с трансляцией\");" +
-                "insert into Start(idStart,start_name) values (2,\"Внешний старт по фронту\");" +
-                "insert into Start(idStart,start_name) values (3,\"Внешний старт по спаду\");" +
-                //параметры аналоговой синхронизации
-                "insert into Syncho(idSyncho,synch_name) values (0,\"Отсутствие\");" +
-                "insert into Syncho(idSyncho,synch_name) values (1,\"по переходу вверх\");" +
-                "insert into Syncho(idSyncho,synch_name) values (2,\"по переходу вниз\");" +
-                "insert into Syncho(idSyncho,synch_name) values (3,\"по уровню выше\");" +
-                "insert into Syncho(idSyncho,synch_name) values (4,\"по уровню ниже\");" +
-                //параметры тактовых импульсов
-                "insert into Impul(idImpul,name_impu) values (0,\"Внутренние\");" +
-                "insert into Impul(idImpul,name_impu) values (1,\"Внутренние с трансляцией\");" +
-                "insert into Impul(idImpul,name_impu) values (2,\"Внешние по фронту\");" +
-                "insert into Impul(idImpul,name_impu) values (3,\"Внешние по спаду\");" +
-                //параметры типа подключения
-                "insert into Podkl(idPodkl,name_podkl) values (0,\"Заземленный канал АЦП модуля\");" +
-                "insert into Podkl(idPodkl,name_podkl) values (1,\"Подача выходного сигнала на вход АЦП модуля\");" +
-                //параметры входного напряжения      
-                "insert into input_voltage(code,value) values (0,3000);" +
-                "insert into input_voltage(code,value) values (1,1000);" +
-                "insert into input_voltage(code,value) values (2,300);" +
-                //параметры частоты работы
-                "insert into chast(idchast,znach_chast) values (0,1000);" +
-                "insert into chast(idchast,znach_chast) values (1,2000);" +
-                "insert into chast(idchast,znach_chast) values (2,3000);" +
-                "insert into chast(idchast,znach_chast) values (3,4000);" +
-                "insert into chast(idchast,znach_chast) values (4,5000);";
+            //параметры Режима старта
+            "insert into Start(idStart,start_name) values (0,\"Внутренний старт\");" +
+            "insert into Start(idStart,start_name) values (1,\"Внутренний старт с трансляцией\");" +
+            "insert into Start(idStart,start_name) values (2,\"Внешний старт по фронту\");" +
+            "insert into Start(idStart,start_name) values (3,\"Внешний старт по спаду\");" +
+            //параметры аналоговой синхронизации
+            "insert into Syncho(idSyncho,synch_name) values (0,\"Отсутствие\");" +
+            "insert into Syncho(idSyncho,synch_name) values (1,\"по переходу вверх\");" +
+            "insert into Syncho(idSyncho,synch_name) values (2,\"по переходу вниз\");" +
+            "insert into Syncho(idSyncho,synch_name) values (3,\"по уровню выше\");" +
+            "insert into Syncho(idSyncho,synch_name) values (4,\"по уровню ниже\");" +
+            //параметры тактовых импульсов
+            "insert into Impul(idImpul,name_impu) values (0,\"Внутренние\");" +
+            "insert into Impul(idImpul,name_impu) values (1,\"Внутренние с трансляцией\");" +
+            "insert into Impul(idImpul,name_impu) values (2,\"Внешние по фронту\");" +
+            "insert into Impul(idImpul,name_impu) values (3,\"Внешние по спаду\");" +
+            //параметры типа подключения
+            "insert into Podkl(idPodkl,name_podkl) values (0,\"Заземленный канал АЦП модуля\");" +
+            "insert into Podkl(idPodkl,name_podkl) values (1,\"Подача выходного сигнала на вход АЦП модуля\");" +
+            //параметры входного напряжения      
+            "insert into input_voltage(code,value) values (0,3000);" +
+            "insert into input_voltage(code,value) values (1,1000);" +
+            "insert into input_voltage(code,value) values (2,300);" +
+            //параметры частоты работы
+            "insert into chast(idchast,znach_chast) values (0,1000);" +
+            "insert into chast(idchast,znach_chast) values (1,2000);" +
+            "insert into chast(idchast,znach_chast) values (2,3000);" +
+            "insert into chast(idchast,znach_chast) values (3,4000);" +
+            "insert into chast(idchast,znach_chast) values (4,5000);";
 
             cmd.CommandText = insert;
             cmd.ExecuteNonQuery();
@@ -359,7 +357,7 @@ namespace DesktopAPP
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
         {
-           
+
             new Thread((worker) => grapth()).Start();
             void grapth()
             {
@@ -370,7 +368,7 @@ namespace DesktopAPP
                 string name = "Grpth";
                 convert(name);
                 ReadClass rc = new ReadClass();
-                MWCharArray mlfname = new MWCharArray(name+".txt");
+                MWCharArray mlfname = new MWCharArray(name + ".txt");
                 rc.read(0, mlfname);
                 File.Delete("Grpth.txt");
                 this.Invoke(new Action(() =>
@@ -379,7 +377,7 @@ namespace DesktopAPP
                     this.unlockGui(true);
                 }));
             }
-           
+
         }
 
         private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
@@ -391,15 +389,15 @@ namespace DesktopAPP
 
         private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
-           
+
+
             this.Invoke(new Action(() =>
             {
                 this.unlockGui(false);
             }));
-           
-              string  name = "Эксперимент";
-            
+
+            string name = "Эксперимент";
+
 
             convert(name);
             this.Invoke(new Action(() =>
@@ -536,10 +534,10 @@ namespace DesktopAPP
                 for (int n = 0; n < prms.channels.Count; ++n)
                 {
                     string upload_sql =
-                        "insert into channel (data, num, file, input_voltage) values (@vanya, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
                     cmd.CommandText = upload_sql;
                     byte[] channel_data = channels_data[n].ToArray();
-                    cmd.Parameters.Add("@vanya", DbType.Binary, channel_data.Length).Value = channel_data;
+                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
                     cmd.ExecuteNonQuery();
                 }
 
@@ -568,10 +566,10 @@ namespace DesktopAPP
                 for (int n = 0; n < prms.channels.Count; ++n)
                 {
                     string upload_sql =
-                        "insert into channel (data, num, file, input_voltage) values (@vanya, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
                     cmd.CommandText = upload_sql;
                     byte[] channel_data = channels_data[n].ToArray();
-                    cmd.Parameters.Add("@vanya", DbType.Binary, channel_data.Length).Value = channel_data;
+                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
                     cmd.ExecuteNonQuery();
                 }
 
@@ -639,7 +637,7 @@ namespace DesktopAPP
         }
 
         private void convert(string name)
-            {
+        {
             try
             {
                 string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
@@ -675,7 +673,7 @@ namespace DesktopAPP
                             {
                                 bytenum = 0;
                                 double val = BitConverter.ToInt16(buf, 0);
-                               // val = val * input_voltage / 8000;
+                              //  val = val * input_voltage / 8000;
 
                                 decnums.Add(val);
                             }
@@ -685,7 +683,7 @@ namespace DesktopAPP
                         result.Add(decnums);
                     }
 
-                    StreamWriter file = new StreamWriter(name+".txt");
+                    StreamWriter file = new StreamWriter(name + ".txt");
 
                     string delim = "\t";
                     long minlength = long.MaxValue;
@@ -744,5 +742,7 @@ namespace DesktopAPP
                 return stream.ToArray();
             }
         }
+
+      
     }
 }
