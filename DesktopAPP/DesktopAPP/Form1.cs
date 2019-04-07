@@ -5,7 +5,7 @@ GUI для идентификации параметров ПЭД
 Начало разработки: 03.11.18
 Окончание разработки:13.06.19
 Стадия разработки: бета версия
-Дата последней модификации:12.03.2019
+Дата последней модификации:07.04.2019
 
 */
 
@@ -22,6 +22,9 @@ using System.Data.SQLite;
 using MathWorks.MATLAB.NET.Arrays;
 using MathWorks.MATLAB.NET.Utility;
 using read;
+using System.IO.Ports;
+using System.Drawing;
+using System.Text;
 
 namespace DesktopAPP
 {
@@ -203,6 +206,7 @@ namespace DesktopAPP
             metroComboBox2.Enabled = false;
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
+            updatePorts();
         }
 
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
@@ -368,7 +372,7 @@ namespace DesktopAPP
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            metroCheckBox6.Enabled = true;
             new Thread((worker) => grapth()).Start();
             void grapth()
             {
@@ -400,7 +404,7 @@ namespace DesktopAPP
 
         private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            metroCheckBox6.Enabled = false;
 
             this.Invoke(new Action(() =>
             {
@@ -411,6 +415,8 @@ namespace DesktopAPP
 
 
             convert(name);
+
+
             this.Invoke(new Action(() =>
             {
                 metroButton2.Visible = false;
@@ -471,11 +477,11 @@ namespace DesktopAPP
                 + " -q " + datadir;
             param += " -ca " + i;
 
-            Console.WriteLine(param);
+            //  Console.WriteLine(param);
 
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.CreateNoWindow = false;
+            process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = false;
             process.StartInfo.Arguments = "/C " + "C:\\Users\\Brik\\Desktop\\проги\\ReadData\\Debug\\ReadData.exe " + param;
@@ -684,8 +690,15 @@ namespace DesktopAPP
                             {
                                 bytenum = 0;
                                 double val = BitConverter.ToInt16(buf, 0);
-                              //  val = val * input_voltage / 8000;
 
+                                if (metroCheckBox6.Enabled == true)
+                                {
+                                    // val = val * input_voltage / 8000;
+                                }
+                                else
+                                {
+                                    val = val * input_voltage / 8000;
+                                }
                                 decnums.Add(val);
                             }
                             buf[bytenum] = bindata[i];
@@ -754,6 +767,169 @@ namespace DesktopAPP
             }
         }
 
-      
+        private void updatePorts()
+        {
+            // Retrieve the list of all COM ports on your Computer
+            string[] ports = SerialPort.GetPortNames();
+            foreach (string port in ports)
+            {
+                cmbPortName.Items.Add(port);
+            }
+        }
+
+        private SerialPort ComPort = new SerialPort();
+
+        private void btnConnect_Click(object sender, EventArgs e)
+        {
+            if (ComPort.IsOpen)
+            {
+                disconnect();
+            }
+            else
+            {
+                connect();
+            }
+        }
+
+        private void connect()
+        {
+            bool error = false;
+
+            // Check if all settings have been selected
+
+            if (cmbPortName.SelectedIndex != -1 & cmbBaudRate.SelectedIndex != -1 & cmbParity.SelectedIndex != -1 & cmbDataBits.SelectedIndex != -1 & cmbStopBits.SelectedIndex != -1)
+            {
+                //if yes than Set The Port's settings
+                ComPort.PortName = cmbPortName.Text;
+                ComPort.BaudRate = int.Parse(cmbBaudRate.Text);      //convert Text to Integer
+                ComPort.Parity = (Parity)Enum.Parse(typeof(Parity), cmbParity.Text); //convert Text to Parity
+                ComPort.DataBits = int.Parse(cmbDataBits.Text);        //convert Text to Integer
+                ComPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), cmbStopBits.Text);  //convert Text to stop bits
+                try
+                {
+
+                    ComPort.Open();
+                }
+                catch (UnauthorizedAccessException) { error = true; }
+                catch (System.IO.IOException) { error = true; }
+                catch (ArgumentException) { error = true; }
+
+                if (error) MessageBox.Show(this, "Не удалось открыть COM - порт.Скорее всего, он уже используется, удален или недоступен.", "COM Port unavailable", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+
+            }
+            else
+            {
+                MessageBox.Show("Пожалуйста, выберите все настройки COM - порта", "Serial Port Interface", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+
+            }
+            //if the port is open, Change the Connect button to disconnect, enable the send button.
+            //and disable the groupBox to prevent changing configuration of an open port.
+            if (ComPort.IsOpen)
+            {
+                btnConnect.Text = "Disconnect";
+                btnSend.Enabled = true;
+                if (!rdText.Checked & !rdHex.Checked)  //if no data mode is selected, then select text mode by default
+                {
+                    rdText.Checked = true;
+                }
+                groupBox1.Enabled = false;
+
+            }
+        }
+
+        private void disconnect()
+        {
+            ComPort.Close();
+            btnConnect.Text = "Connect";
+            btnSend.Enabled = false;
+            groupBox1.Enabled = true;
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            rtxtDataArea.Clear();
+            txtSend.Clear();
+        }
+
+        private void sendData()
+        {
+            bool error = false;
+            if (rdText.Checked == true)        //if text mode is selected, send data as tex
+            {              
+                ComPort.Write(txtSend.Text);
+                rtxtDataArea.ForeColor = Color.Green;    
+                rtxtDataArea.AppendText(txtSend.Text + "\n");
+                txtSend.Clear();                      
+            }
+            else                    
+            {
+                try
+                {
+                    // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
+                    byte[] data = HexStringToByteArray(txtSend.Text);
+
+                    // Send the binary data out the port
+                    try
+                    {
+                        ComPort.Write(data, 0, data.Length);
+                    }catch
+                    {
+                        MessageBox.Show("Порт закрыт","Error ports ",MessageBoxButtons.OK,MessageBoxIcon.Error);                       
+                    }
+                    // Show the hex digits on in the terminal window
+                    rtxtDataArea.ForeColor = Color.Blue;   //write Hex data in Blue
+                    rtxtDataArea.AppendText(txtSend.Text.ToUpper() + "\n");
+                    txtSend.Clear();                       //clear screen after sending data
+                }
+                catch (FormatException) { error = true; }
+
+                // Inform the user if the hex string was not properly formatted
+                catch (ArgumentException) { error = true; }
+
+                if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + txtSend.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+
+            }
+        }
+
+        private byte[] HexStringToByteArray(string s)
+        {
+            s = s.Replace(" ", "");
+            byte[] buffer = new byte[s.Length / 2];
+            for (int i = 0; i < s.Length; i += 2)
+                buffer[i / 2] = (byte)Convert.ToByte(s.Substring(i, 2), 16);
+            return buffer;
+        }
+
+        //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
+        //The array of bytes to be translated into a string of hex digits. 
+        //Returns a well formatted string of hex digits with spacing. 
+        private string ByteArrayToHexString(byte[] data)
+        {
+            StringBuilder sb = new StringBuilder(data.Length * 3);
+            foreach (byte b in data)
+                sb.Append(Convert.ToString(b, 16).PadLeft(2, '0').PadRight(3, ' '));
+            return sb.ToString().ToUpper();
+        }
+
+        private void btnSend_Click(object sender, EventArgs e)
+        {
+            sendData();
+        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (ComPort.IsOpen) ComPort.Close();  //close the port if open when exiting the application.
+        }
+        // when data is received on the port, it will raise this event 
+
+        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            string recievedData = serialPort1.ReadExisting();
+
+            // Show in the terminal window 
+            rtxtDataArea.ForeColor = Color.Green;    //write text data in Green
+            rtxtDataArea.AppendText(recievedData + "\n");
+        }
     }
-}
+
+    }
+
