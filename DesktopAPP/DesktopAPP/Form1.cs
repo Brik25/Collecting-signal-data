@@ -868,14 +868,8 @@ namespace DesktopAPP
                     // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
                     byte[] data = HexStringToByteArray(txtSend.Text);
 
-                    // Send the binary data out the port
-                    try
-                    {
-                        ComPort.Write(data, 0, data.Length);
-                    }catch
-                    {
-                        MessageBox.Show("Порт закрыт","Error ports ",MessageBoxButtons.OK,MessageBoxIcon.Error);                       
-                    }
+                    // Send the binary data out the port                  
+                        ComPort.Write(data, 0, data.Length);              
                     // Show the hex digits on in the terminal window
                     rtxtDataArea.ForeColor = Color.Blue;   //write Hex data in Blue
                     rtxtDataArea.AppendText(txtSend.Text.ToUpper() + "\n");
