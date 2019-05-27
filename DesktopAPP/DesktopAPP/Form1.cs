@@ -89,7 +89,9 @@ namespace DesktopAPP
              "num integer NOT NULL," +
              "file integer REFERENCES info_table(id)," +
              "input_voltage integer REFERENCES input_voltage(code)" +
-             ");";
+             ");"+
+             "CREATE TABLE Com_ports (id integer primary key, commands varchar(45) NOT NULL);"
+             ;
 
 
             cmd.CommandText = sql_create;
@@ -203,6 +205,8 @@ namespace DesktopAPP
             metroComboBox7.SelectedIndex = 0;
             metroComboBox8.SelectedIndex = 0;
             metroComboBox9.SelectedIndex = 1;
+            txtSend.Visible = false;
+            btnClear.Enabled = false;
             metroComboBox2.Enabled = false;
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
@@ -855,25 +859,43 @@ namespace DesktopAPP
         {
             bool error = false;
             if (rdText.Checked == true)        //if text mode is selected, send data as tex
-            {              
-                ComPort.Write(txtSend.Text);
-                rtxtDataArea.ForeColor = Color.Green;    
-                rtxtDataArea.AppendText(txtSend.Text + "\n");
-                txtSend.Clear();                      
+            {
+                if (metroCheckBox7.Checked == true)
+                {
+                    ComPort.Write(txtSend.Text);
+                    rtxtDataArea.ForeColor = Color.Green;
+                    rtxtDataArea.AppendText(txtSend.Text + "\n");
+                    txtSend.Clear();
+                }
+                else
+                {
+                    ComPort.Write(metroComboBox10.Text);
+                    rtxtDataArea.ForeColor = Color.Green;
+                    rtxtDataArea.AppendText(metroComboBox10.Text + "\n");
+                    
+                }                      
             }
             else                    
             {
                 try
                 {
-                    // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
-                    byte[] data = HexStringToByteArray(txtSend.Text);
-
-                    // Send the binary data out the port                  
-                        ComPort.Write(data, 0, data.Length);              
-                    // Show the hex digits on in the terminal window
-                    rtxtDataArea.ForeColor = Color.Blue;   //write Hex data in Blue
-                    rtxtDataArea.AppendText(txtSend.Text.ToUpper() + "\n");
-                    txtSend.Clear();                       //clear screen after sending data
+                    if (metroCheckBox7.Checked == true)
+                    {
+                        // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
+                        byte[] data = HexStringToByteArray(txtSend.Text);                                        
+                        ComPort.Write(data, 0, data.Length); // Send the binary data out the port                      
+                        rtxtDataArea.ForeColor = Color.Blue;  // Show the hex digits on in the terminal window  write Hex data in Blue
+                        rtxtDataArea.AppendText(txtSend.Text.ToUpper() + "\n");
+                        txtSend.Clear();                       //clear screen after sending data
+                    }
+                    else
+                    {
+                        // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
+                        byte[] data = HexStringToByteArray(metroComboBox10.Text);
+                        ComPort.Write(data, 0, data.Length); // Send the binary data out the port                      
+                        rtxtDataArea.ForeColor = Color.Blue;  // Show the hex digits on in the terminal window  write Hex data in Blue
+                        rtxtDataArea.AppendText(metroComboBox10.Text.ToUpper() + "\n");
+                    }
                 }
                 catch (FormatException) { error = true; }
 
@@ -922,6 +944,28 @@ namespace DesktopAPP
             // Show in the terminal window 
             rtxtDataArea.ForeColor = Color.Green;    //write text data in Green
             rtxtDataArea.AppendText(recievedData + "\n");
+        }
+
+        private void metroCheckBox7_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox7.Checked == true)
+            {
+                txtSend.Visible = true;
+                metroComboBox10.Visible = false;
+                btnClear.Enabled = true;
+            }
+            else
+            {
+                txtSend.Visible = false;
+                metroComboBox10.Visible = true;
+                btnClear.Enabled = false;
+            }
+        }
+
+        private void metroButton3_Click(object sender, EventArgs e)
+        {
+            Form2 com_form = new Form2();
+            com_form.Show();
         }
     }
 
