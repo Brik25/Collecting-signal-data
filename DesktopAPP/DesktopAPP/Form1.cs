@@ -190,6 +190,14 @@ namespace DesktopAPP
             {
                 metroComboBox9.Items.Add(re.GetValue(0).ToString());
             }
+
+            SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
+            re = com_command.ExecuteReader();
+            while (re.Read())
+            {
+                metroComboBox10.Items.Add(re.GetValue(0).ToString());
+            }
+
             UpdataMena();
             conn.Close();
         }
@@ -785,13 +793,14 @@ namespace DesktopAPP
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
+        
             if (ComPort.IsOpen)
             {
                 disconnect();
             }
             else
             {
-                connect();
+                connect();    
             }
         }
 
@@ -811,7 +820,6 @@ namespace DesktopAPP
                 ComPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), cmbStopBits.Text);  //convert Text to stop bits
                 try
                 {
-
                     ComPort.Open();
                 }
                 catch (UnauthorizedAccessException) { error = true; }
@@ -819,13 +827,12 @@ namespace DesktopAPP
                 catch (ArgumentException) { error = true; }
 
                 if (error) MessageBox.Show(this, "Не удалось открыть COM - порт.Скорее всего, он уже используется, удален или недоступен.", "COM Port unavailable", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-
-            }
-            else
-            {
+                }
+                else
+                {
                 MessageBox.Show("Пожалуйста, выберите все настройки COM - порта", "Serial Port Interface", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
 
-            }
             //if the port is open, Change the Connect button to disconnect, enable the send button.
             //and disable the groupBox to prevent changing configuration of an open port.
             if (ComPort.IsOpen)
@@ -903,17 +910,18 @@ namespace DesktopAPP
                 catch (ArgumentException) { error = true; }
 
                 if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + txtSend.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-
-            }
+            }   
         }
 
         private byte[] HexStringToByteArray(string s)
         {
+           
             s = s.Replace(" ", "");
             byte[] buffer = new byte[s.Length / 2];
             for (int i = 0; i < s.Length; i += 2)
                 buffer[i / 2] = (byte)Convert.ToByte(s.Substring(i, 2), 16);
             return buffer;
+            
         }
 
         //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
@@ -929,7 +937,9 @@ namespace DesktopAPP
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            sendData();
+
+             sendData();
+
         }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -937,14 +947,13 @@ namespace DesktopAPP
         }
         // when data is received on the port, it will raise this event 
 
-        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void serialPort1_DataReceived_1(object sender, SerialDataReceivedEventArgs e)
         {
-            string recievedData = serialPort1.ReadExisting();
-
-            // Show in the terminal window 
+            string recievedData = serialPort1.ReadExisting(); // Show in the terminal window          
             rtxtDataArea.ForeColor = Color.Green;    //write text data in Green
             rtxtDataArea.AppendText(recievedData + "\n");
         }
+
 
         private void metroCheckBox7_CheckedChanged(object sender, EventArgs e)
         {
@@ -953,12 +962,14 @@ namespace DesktopAPP
                 txtSend.Visible = true;
                 metroComboBox10.Visible = false;
                 btnClear.Enabled = true;
+              
             }
             else
             {
                 txtSend.Visible = false;
                 metroComboBox10.Visible = true;
                 btnClear.Enabled = false;
+                
             }
         }
 
@@ -967,7 +978,21 @@ namespace DesktopAPP
             Form2 com_form = new Form2();
             com_form.Show();
         }
-    }
+
+        private void metroComboBox10_MouseClick(object sender, MouseEventArgs e)
+        {
+            
+            metroComboBox10.Items.Clear();
+            conn.Open();
+            SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
+            re = com_command.ExecuteReader();
+            while (re.Read())
+            {
+                metroComboBox10.Items.Add(re.GetValue(0).ToString());
+            }
+            conn.Close();       
+        }
 
     }
+}
 
