@@ -219,6 +219,7 @@ namespace DesktopAPP
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
             updatePorts();
+
         }
 
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
@@ -371,15 +372,22 @@ namespace DesktopAPP
 
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int ind = metroGrid1.SelectedCells[0].RowIndex;
-            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-            metroGrid1.Rows.RemoveAt(ind);
-            conn.Open();
-            string delete = "DELETE FROM info_table WHERE id='" + id + "';DELETE FROM channel WHERE file = '" + id + "'";
+            try
+            {
+                int ind = metroGrid1.SelectedCells[0].RowIndex;
+                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                metroGrid1.Rows.RemoveAt(ind);
+                conn.Open();
+                string delete = "DELETE FROM info_table WHERE id='" + id + "';DELETE FROM channel WHERE file = '" + id + "'";
 
-            SQLiteCommand cmd = new SQLiteCommand(delete, conn);
-            cmd.ExecuteNonQuery();
-            conn.Close();
+                SQLiteCommand cmd = new SQLiteCommand(delete, conn);
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+            catch
+            {
+                MessageBox.Show("Не выбран эксперимент", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
@@ -501,120 +509,121 @@ namespace DesktopAPP
             process.WaitForExit();
 
             int tmp = i;
-            new Task(() => insert_entry(i, prms)).Start();
-
+            
+                new Task(() => insert_entry(i, prms)).Start();
         }
 
         private void insert_entry(int i, Params prms)
         {
-            db_mtx.WaitOne();
-            conn.Open();
-            SQLiteCommand cmd = new SQLiteCommand(conn);
+            
+                db_mtx.WaitOne();
+                conn.Open();
+                SQLiteCommand cmd = new SQLiteCommand(conn);
 
 
-            var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
-            List<byte>[] channels_data = new List<byte>[prms.channels.Count];
-            for (int n = 0; n < prms.channels.Count; ++n)
-            {
-                channels_data[n] = new List<byte>();
-            }
-            for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
-            {
-                if (m == 2)
-                {
-                    ++k;
-                    m = 0;
-                }
-                if (k == prms.channels.Count)
-                    k = 0;
-                channels_data[k].Add(data[n]);
-            }
+              var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
 
-            if (metroCheckBox5.Enabled == true)
-            {
-                string insert_file_sql =
-                "insert into info_table (" +
-                "   Impul_idImpul," +
-                "   chast_idchast," +
-                "   Start_idStart," +
-                "   Syncho_idSyncho," +
-                "   Podkl_idPodkl," +
-                "   Cap," +
-                "   name," +
-                "   chan_num) " +
-                "values (" +
-
-                prms.pulse_type + "," +
-                prms.frequency2 + "," +
-                prms.start_mode + "," +
-                prms.sync_type + "," +
-                prms.conn_type + "," +
-                i + ",'" +
-                fprefix + i + "'," +
-                prms.channels.Count +
-                ");";
-
-                cmd.CommandText = insert_file_sql;
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "select last_insert_rowid()";
-                long file_id = (long)cmd.ExecuteScalar();
-
+                List<byte>[] channels_data = new List<byte>[prms.channels.Count];
                 for (int n = 0; n < prms.channels.Count; ++n)
                 {
-                    string upload_sql =
-                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
-                    cmd.CommandText = upload_sql;
-                    byte[] channel_data = channels_data[n].ToArray();
-                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
-                    cmd.ExecuteNonQuery();
+                    channels_data[n] = new List<byte>();
+                }
+                for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
+                {
+                    if (m == 2)
+                    {
+                        ++k;
+                        m = 0;
+                    }
+                    if (k == prms.channels.Count)
+                        k = 0;
+                    channels_data[k].Add(data[n]);
                 }
 
-            }
-            else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
-            {
-                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-                string delete = "Delete FROM channel where file = " + id;
-                cmd.CommandText = delete;
-                cmd.ExecuteNonQuery();
-
-                string update_file_sql =
-                                        "UPDATE info_table SET " +
-                                        "impul_idImpul='" + prms.pulse_type + "'," +
-                                        "chast_idchast='" + prms.frequency2 + "'," +
-                                        "Start_idStart='" + prms.start_mode + "'," +
-                                        "Syncho_idSyncho='" + prms.sync_type + "'," +
-                                        "Podkl_idPodkl='" + prms.conn_type + "'," +
-                                        "Cap='" + i + "'," +
-                                        "name='" + fprefix + i + "'," +
-                                        "chan_num='" + prms.channels.Count + "' " +
-                                        "WHERE id ='" + id + "'";
-                cmd.CommandText = update_file_sql;
-                cmd.ExecuteNonQuery();
-
-                for (int n = 0; n < prms.channels.Count; ++n)
+                if (metroCheckBox5.Enabled == true)
                 {
-                    string upload_sql =
-                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
-                    cmd.CommandText = upload_sql;
-                    byte[] channel_data = channels_data[n].ToArray();
-                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                    string insert_file_sql =
+                    "insert into info_table (" +
+                    "   Impul_idImpul," +
+                    "   chast_idchast," +
+                    "   Start_idStart," +
+                    "   Syncho_idSyncho," +
+                    "   Podkl_idPodkl," +
+                    "   Cap," +
+                    "   name," +
+                    "   chan_num) " +
+                    "values (" +
+
+                    prms.pulse_type + "," +
+                    prms.frequency2 + "," +
+                    prms.start_mode + "," +
+                    prms.sync_type + "," +
+                    prms.conn_type + "," +
+                    i + ",'" +
+                    fprefix + i + "'," +
+                    prms.channels.Count +
+                    ");";
+
+                    cmd.CommandText = insert_file_sql;
                     cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = "select last_insert_rowid()";
+                    long file_id = (long)cmd.ExecuteScalar();
+
+                    for (int n = 0; n < prms.channels.Count; ++n)
+                    {
+                        string upload_sql =
+                            "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                        cmd.CommandText = upload_sql;
+                        byte[] channel_data = channels_data[n].ToArray();
+                        cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                }
+                else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
+                {
+                    string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                    string delete = "Delete FROM channel where file = " + id;
+                    cmd.CommandText = delete;
+                    cmd.ExecuteNonQuery();
+
+                    string update_file_sql =
+                                            "UPDATE info_table SET " +
+                                            "impul_idImpul='" + prms.pulse_type + "'," +
+                                            "chast_idchast='" + prms.frequency2 + "'," +
+                                            "Start_idStart='" + prms.start_mode + "'," +
+                                            "Syncho_idSyncho='" + prms.sync_type + "'," +
+                                            "Podkl_idPodkl='" + prms.conn_type + "'," +
+                                            "Cap='" + i + "'," +
+                                            "name='" + fprefix + i + "'," +
+                                            "chan_num='" + prms.channels.Count + "' " +
+                                            "WHERE id ='" + id + "'";
+                    cmd.CommandText = update_file_sql;
+                    cmd.ExecuteNonQuery();
+
+                    for (int n = 0; n < prms.channels.Count; ++n)
+                    {
+                        string upload_sql =
+                            "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                        cmd.CommandText = upload_sql;
+                        byte[] channel_data = channels_data[n].ToArray();
+                        cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    this.Invoke(new Action(() =>
+                    {
+                        metroCheckBox6.Checked = false;
+                        metroCheckBox5.Enabled = true;
+                    }));
                 }
 
-                this.Invoke(new Action(() =>
-                {
-                    metroCheckBox6.Checked = false;
-                    metroCheckBox5.Enabled = true;
-                }));
+                UpdataMena();
+                conn.Close();
+                db_mtx.ReleaseMutex();
+                File.Delete(datadir + "/" + fprefix + i + ".dat");
             }
-
-            UpdataMena();
-            conn.Close();
-            db_mtx.ReleaseMutex();
-            File.Delete(datadir + "/" + fprefix + i + ".dat");
-
-        }
 
         private void UpdataMena()
         {
@@ -843,7 +852,7 @@ namespace DesktopAPP
                 {
                     rdText.Checked = true;
                 }
-                groupBox1.Enabled = false;
+                groupBox3.Enabled = false;
 
             }
         }
@@ -853,7 +862,7 @@ namespace DesktopAPP
             ComPort.Close();
             btnConnect.Text = "Connect";
             btnSend.Enabled = false;
-            groupBox1.Enabled = true;
+            groupBox3.Enabled = true;
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -910,6 +919,7 @@ namespace DesktopAPP
                 catch (ArgumentException) { error = true; }
 
                 if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + txtSend.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                
             }   
         }
 
@@ -993,6 +1003,21 @@ namespace DesktopAPP
             conn.Close();       
         }
 
+        private void metroGrid1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (metroGrid1.Rows.Count == 0)
+                {
+                    metroContextMenu1.Enabled = false;
+                }
+                else
+                {
+                    metroContextMenu1.Enabled = true;
+                }
+                
+            }
+        }
     }
 }
 
