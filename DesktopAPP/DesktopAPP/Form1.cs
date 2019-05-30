@@ -32,7 +32,7 @@ namespace DesktopAPP
     {
         int computation_interrupt = 0;
         int max_value;
-
+        
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
 
@@ -40,6 +40,8 @@ namespace DesktopAPP
 
         string datadir = "Evaluates";
         string fprefix = "Test ";
+        string dataOUT;
+        string dataIN;
 
         struct Params
         {
@@ -89,7 +91,7 @@ namespace DesktopAPP
              "num integer NOT NULL," +
              "file integer REFERENCES info_table(id)," +
              "input_voltage integer REFERENCES input_voltage(code)" +
-             ");"+
+             ");" +
              "CREATE TABLE Com_ports (id integer primary key, commands varchar(45) NOT NULL);"
              ;
 
@@ -212,13 +214,21 @@ namespace DesktopAPP
             metroComboBox6.SelectedIndex = 0;
             metroComboBox7.SelectedIndex = 0;
             metroComboBox8.SelectedIndex = 0;
-            metroComboBox9.SelectedIndex = 1;
-            txtSend.Visible = false;
-            btnClear.Enabled = false;
+            metroComboBox9.SelectedIndex = 1;         
             metroComboBox2.Enabled = false;
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
-            updatePorts();
+
+
+            //COM ports
+            string[] ports = SerialPort.GetPortNames();
+            metroComboBox11.Items.AddRange(ports);
+            metroComboBox12.SelectedIndex = 2;
+            metroComboBox13.SelectedIndex = 2;
+            metroComboBox14.SelectedIndex = 0;
+            metroComboBox15.SelectedIndex = 0;
+            metroCheckBox7.Checked = true;
+            groupBox4.Enabled = false;
 
         }
 
@@ -509,121 +519,121 @@ namespace DesktopAPP
             process.WaitForExit();
 
             int tmp = i;
-            
-                new Task(() => insert_entry(i, prms)).Start();
+
+            new Task(() => insert_entry(i, prms)).Start();
         }
 
         private void insert_entry(int i, Params prms)
         {
-            
-                db_mtx.WaitOne();
-                conn.Open();
-                SQLiteCommand cmd = new SQLiteCommand(conn);
+
+            db_mtx.WaitOne();
+            conn.Open();
+            SQLiteCommand cmd = new SQLiteCommand(conn);
 
 
-              var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
+            var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
 
-                List<byte>[] channels_data = new List<byte>[prms.channels.Count];
+            List<byte>[] channels_data = new List<byte>[prms.channels.Count];
+            for (int n = 0; n < prms.channels.Count; ++n)
+            {
+                channels_data[n] = new List<byte>();
+            }
+            for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
+            {
+                if (m == 2)
+                {
+                    ++k;
+                    m = 0;
+                }
+                if (k == prms.channels.Count)
+                    k = 0;
+                channels_data[k].Add(data[n]);
+            }
+
+            if (metroCheckBox5.Enabled == true)
+            {
+                string insert_file_sql =
+                "insert into info_table (" +
+                "   Impul_idImpul," +
+                "   chast_idchast," +
+                "   Start_idStart," +
+                "   Syncho_idSyncho," +
+                "   Podkl_idPodkl," +
+                "   Cap," +
+                "   name," +
+                "   chan_num) " +
+                "values (" +
+
+                prms.pulse_type + "," +
+                prms.frequency2 + "," +
+                prms.start_mode + "," +
+                prms.sync_type + "," +
+                prms.conn_type + "," +
+                i + ",'" +
+                fprefix + i + "'," +
+                prms.channels.Count +
+                ");";
+
+                cmd.CommandText = insert_file_sql;
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "select last_insert_rowid()";
+                long file_id = (long)cmd.ExecuteScalar();
+
                 for (int n = 0; n < prms.channels.Count; ++n)
                 {
-                    channels_data[n] = new List<byte>();
-                }
-                for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
-                {
-                    if (m == 2)
-                    {
-                        ++k;
-                        m = 0;
-                    }
-                    if (k == prms.channels.Count)
-                        k = 0;
-                    channels_data[k].Add(data[n]);
-                }
-
-                if (metroCheckBox5.Enabled == true)
-                {
-                    string insert_file_sql =
-                    "insert into info_table (" +
-                    "   Impul_idImpul," +
-                    "   chast_idchast," +
-                    "   Start_idStart," +
-                    "   Syncho_idSyncho," +
-                    "   Podkl_idPodkl," +
-                    "   Cap," +
-                    "   name," +
-                    "   chan_num) " +
-                    "values (" +
-
-                    prms.pulse_type + "," +
-                    prms.frequency2 + "," +
-                    prms.start_mode + "," +
-                    prms.sync_type + "," +
-                    prms.conn_type + "," +
-                    i + ",'" +
-                    fprefix + i + "'," +
-                    prms.channels.Count +
-                    ");";
-
-                    cmd.CommandText = insert_file_sql;
+                    string upload_sql =
+                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                    cmd.CommandText = upload_sql;
+                    byte[] channel_data = channels_data[n].ToArray();
+                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
                     cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = "select last_insert_rowid()";
-                    long file_id = (long)cmd.ExecuteScalar();
-
-                    for (int n = 0; n < prms.channels.Count; ++n)
-                    {
-                        string upload_sql =
-                            "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
-                        cmd.CommandText = upload_sql;
-                        byte[] channel_data = channels_data[n].ToArray();
-                        cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
-                        cmd.ExecuteNonQuery();
-                    }
-
-                }
-                else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
-                {
-                    string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-                    string delete = "Delete FROM channel where file = " + id;
-                    cmd.CommandText = delete;
-                    cmd.ExecuteNonQuery();
-
-                    string update_file_sql =
-                                            "UPDATE info_table SET " +
-                                            "impul_idImpul='" + prms.pulse_type + "'," +
-                                            "chast_idchast='" + prms.frequency2 + "'," +
-                                            "Start_idStart='" + prms.start_mode + "'," +
-                                            "Syncho_idSyncho='" + prms.sync_type + "'," +
-                                            "Podkl_idPodkl='" + prms.conn_type + "'," +
-                                            "Cap='" + i + "'," +
-                                            "name='" + fprefix + i + "'," +
-                                            "chan_num='" + prms.channels.Count + "' " +
-                                            "WHERE id ='" + id + "'";
-                    cmd.CommandText = update_file_sql;
-                    cmd.ExecuteNonQuery();
-
-                    for (int n = 0; n < prms.channels.Count; ++n)
-                    {
-                        string upload_sql =
-                            "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
-                        cmd.CommandText = upload_sql;
-                        byte[] channel_data = channels_data[n].ToArray();
-                        cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    this.Invoke(new Action(() =>
-                    {
-                        metroCheckBox6.Checked = false;
-                        metroCheckBox5.Enabled = true;
-                    }));
                 }
 
-                UpdataMena();
-                conn.Close();
-                db_mtx.ReleaseMutex();
-                File.Delete(datadir + "/" + fprefix + i + ".dat");
             }
+            else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
+            {
+                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                string delete = "Delete FROM channel where file = " + id;
+                cmd.CommandText = delete;
+                cmd.ExecuteNonQuery();
+
+                string update_file_sql =
+                                        "UPDATE info_table SET " +
+                                        "impul_idImpul='" + prms.pulse_type + "'," +
+                                        "chast_idchast='" + prms.frequency2 + "'," +
+                                        "Start_idStart='" + prms.start_mode + "'," +
+                                        "Syncho_idSyncho='" + prms.sync_type + "'," +
+                                        "Podkl_idPodkl='" + prms.conn_type + "'," +
+                                        "Cap='" + i + "'," +
+                                        "name='" + fprefix + i + "'," +
+                                        "chan_num='" + prms.channels.Count + "' " +
+                                        "WHERE id ='" + id + "'";
+                cmd.CommandText = update_file_sql;
+                cmd.ExecuteNonQuery();
+
+                for (int n = 0; n < prms.channels.Count; ++n)
+                {
+                    string upload_sql =
+                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                    cmd.CommandText = upload_sql;
+                    byte[] channel_data = channels_data[n].ToArray();
+                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                    cmd.ExecuteNonQuery();
+                }
+
+                this.Invoke(new Action(() =>
+                {
+                    metroCheckBox6.Checked = false;
+                    metroCheckBox5.Enabled = true;
+                }));
+            }
+
+            UpdataMena();
+            conn.Close();
+            db_mtx.ReleaseMutex();
+            File.Delete(datadir + "/" + fprefix + i + ".dat");
+        }
 
         private void UpdataMena()
         {
@@ -788,201 +798,6 @@ namespace DesktopAPP
             }
         }
 
-        private void updatePorts()
-        {
-            // Retrieve the list of all COM ports on your Computer
-            string[] ports = SerialPort.GetPortNames();
-            foreach (string port in ports)
-            {
-                cmbPortName.Items.Add(port);
-            }
-        }
-
-        private SerialPort ComPort = new SerialPort();
-
-        private void btnConnect_Click(object sender, EventArgs e)
-        {
-        
-            if (ComPort.IsOpen)
-            {
-                disconnect();
-            }
-            else
-            {
-                connect();    
-            }
-        }
-
-        private void connect()
-        {
-            bool error = false;
-
-            // Check if all settings have been selected
-
-            if (cmbPortName.SelectedIndex != -1 & cmbBaudRate.SelectedIndex != -1 & cmbParity.SelectedIndex != -1 & cmbDataBits.SelectedIndex != -1 & cmbStopBits.SelectedIndex != -1)
-            {
-                //if yes than Set The Port's settings
-                ComPort.PortName = cmbPortName.Text;
-                ComPort.BaudRate = int.Parse(cmbBaudRate.Text);      //convert Text to Integer
-                ComPort.Parity = (Parity)Enum.Parse(typeof(Parity), cmbParity.Text); //convert Text to Parity
-                ComPort.DataBits = int.Parse(cmbDataBits.Text);        //convert Text to Integer
-                ComPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), cmbStopBits.Text);  //convert Text to stop bits
-                try
-                {
-                    ComPort.Open();
-                }
-                catch (UnauthorizedAccessException) { error = true; }
-                catch (System.IO.IOException) { error = true; }
-                catch (ArgumentException) { error = true; }
-
-                if (error) MessageBox.Show(this, "Не удалось открыть COM - порт.Скорее всего, он уже используется, удален или недоступен.", "COM Port unavailable", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                }
-                else
-                {
-                MessageBox.Show("Пожалуйста, выберите все настройки COM - порта", "Serial Port Interface", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                }
-
-            //if the port is open, Change the Connect button to disconnect, enable the send button.
-            //and disable the groupBox to prevent changing configuration of an open port.
-            if (ComPort.IsOpen)
-            {
-                btnConnect.Text = "Disconnect";
-                btnSend.Enabled = true;
-                if (!rdText.Checked & !rdHex.Checked)  //if no data mode is selected, then select text mode by default
-                {
-                    rdText.Checked = true;
-                }
-                groupBox3.Enabled = false;
-
-            }
-        }
-
-        private void disconnect()
-        {
-            ComPort.Close();
-            btnConnect.Text = "Connect";
-            btnSend.Enabled = false;
-            groupBox3.Enabled = true;
-        }
-
-        private void btnClear_Click(object sender, EventArgs e)
-        {
-            rtxtDataArea.Clear();
-            txtSend.Clear();
-        }
-
-        private void sendData()
-        {
-            bool error = false;
-            if (rdText.Checked == true)        //if text mode is selected, send data as tex
-            {
-                if (metroCheckBox7.Checked == true)
-                {
-                    ComPort.Write(txtSend.Text);
-                    rtxtDataArea.ForeColor = Color.Green;
-                    rtxtDataArea.AppendText(txtSend.Text + "\n");
-                    txtSend.Clear();
-                }
-                else
-                {
-                    ComPort.Write(metroComboBox10.Text);
-                    rtxtDataArea.ForeColor = Color.Green;
-                    rtxtDataArea.AppendText(metroComboBox10.Text + "\n");
-                    
-                }                      
-            }
-            else                    
-            {
-                try
-                {
-                    if (metroCheckBox7.Checked == true)
-                    {
-                        // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
-                        byte[] data = HexStringToByteArray(txtSend.Text);                                        
-                        ComPort.Write(data, 0, data.Length); // Send the binary data out the port                      
-                        rtxtDataArea.ForeColor = Color.Blue;  // Show the hex digits on in the terminal window  write Hex data in Blue
-                        rtxtDataArea.AppendText(txtSend.Text.ToUpper() + "\n");
-                        txtSend.Clear();                       //clear screen after sending data
-                    }
-                    else
-                    {
-                        // Convert the user's string of hex digits (example: E1 FF 1B) to a byte array
-                        byte[] data = HexStringToByteArray(metroComboBox10.Text);
-                        ComPort.Write(data, 0, data.Length); // Send the binary data out the port                      
-                        rtxtDataArea.ForeColor = Color.Blue;  // Show the hex digits on in the terminal window  write Hex data in Blue
-                        rtxtDataArea.AppendText(metroComboBox10.Text.ToUpper() + "\n");
-                    }
-                }
-                catch (FormatException) { error = true; }
-
-                // Inform the user if the hex string was not properly formatted
-                catch (ArgumentException) { error = true; }
-
-                if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + txtSend.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                
-            }   
-        }
-
-        private byte[] HexStringToByteArray(string s)
-        {
-           
-            s = s.Replace(" ", "");
-            byte[] buffer = new byte[s.Length / 2];
-            for (int i = 0; i < s.Length; i += 2)
-                buffer[i / 2] = (byte)Convert.ToByte(s.Substring(i, 2), 16);
-            return buffer;
-            
-        }
-
-        //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
-        //The array of bytes to be translated into a string of hex digits. 
-        //Returns a well formatted string of hex digits with spacing. 
-        private string ByteArrayToHexString(byte[] data)
-        {
-            StringBuilder sb = new StringBuilder(data.Length * 3);
-            foreach (byte b in data)
-                sb.Append(Convert.ToString(b, 16).PadLeft(2, '0').PadRight(3, ' '));
-            return sb.ToString().ToUpper();
-        }
-
-        private void btnSend_Click(object sender, EventArgs e)
-        {
-
-             sendData();
-
-        }
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (ComPort.IsOpen) ComPort.Close();  //close the port if open when exiting the application.
-        }
-        // when data is received on the port, it will raise this event 
-
-        private void serialPort1_DataReceived_1(object sender, SerialDataReceivedEventArgs e)
-        {
-            string recievedData = serialPort1.ReadExisting(); // Show in the terminal window          
-            rtxtDataArea.ForeColor = Color.Green;    //write text data in Green
-            rtxtDataArea.AppendText(recievedData + "\n");
-        }
-
-
-        private void metroCheckBox7_CheckedChanged(object sender, EventArgs e)
-        {
-            if (metroCheckBox7.Checked == true)
-            {
-                txtSend.Visible = true;
-                metroComboBox10.Visible = false;
-                btnClear.Enabled = true;
-              
-            }
-            else
-            {
-                txtSend.Visible = false;
-                metroComboBox10.Visible = true;
-                btnClear.Enabled = false;
-                
-            }
-        }
-
         private void metroButton3_Click(object sender, EventArgs e)
         {
             Form2 com_form = new Form2();
@@ -1016,6 +831,147 @@ namespace DesktopAPP
                     metroContextMenu1.Enabled = true;
                 }
                 
+            }
+        }
+
+        //Коннект
+        private void metroButton5_Click(object sender, EventArgs e)
+        {
+            try
+            { 
+                //com ports param
+                serialPort1.PortName = metroComboBox11.Text;
+                serialPort1.BaudRate = Convert.ToInt32(metroComboBox12.Text);
+                serialPort1.DataBits = Convert.ToInt32(metroComboBox13.Text);
+                serialPort1.StopBits = (StopBits)Enum.Parse(typeof(StopBits), metroComboBox14.Text);
+                serialPort1.Parity = (Parity)Enum.Parse(typeof(Parity), metroComboBox15.Text);
+                serialPort1.Open();
+                groupBox3.Enabled = false;
+                metroButton5.Visible = false;
+                metroButton6.Visible = true;
+                groupBox4.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void metroButton6_Click(object sender, EventArgs e)
+        {
+            serialPort1.Close();
+            groupBox3.Enabled = true;
+            metroButton5.Visible = true;
+            metroButton6.Visible = false;
+            groupBox4.Enabled = false;
+        }
+
+        private void metroButton4_Click(object sender, EventArgs e)
+        {
+            bool error = false;
+            if (serialPort1.IsOpen)
+            {
+
+
+                if (metroCheckBox8.Checked == false)
+                {
+
+                    if (metroCheckBox7.Checked == true)
+                    {
+                        dataOUT = metroTextBox3.Text;
+                        serialPort1.Write(dataOUT);
+                        textBox1.ForeColor = Color.Green;
+                        textBox1.AppendText(metroTextBox3.Text + "\n");
+
+                    }
+                    else
+                    {
+                        dataOUT = metroComboBox10.Text;
+                        serialPort1.Write(dataOUT);
+                        textBox1.ForeColor = Color.Green;
+                        textBox1.AppendText(metroComboBox10.Text + "\n");
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        if (metroCheckBox7.Checked == true)
+                        {
+                            byte[] data = HexStringToByteArray(metroTextBox3.Text);
+                            serialPort1.Write(data, 0, data.Length);
+                            textBox1.ForeColor = Color.Blue;
+                            textBox1.AppendText(metroTextBox3.Text.ToUpper() + "\n");
+                            metroTextBox3.Clear();
+                        }
+                        else
+                        {
+                            byte[] data = HexStringToByteArray(metroComboBox10.Text);
+                            serialPort1.Write(data, 0, data.Length);
+                            textBox1.ForeColor = Color.Blue;
+                            textBox1.AppendText(metroComboBox10.Text.ToUpper() + "\n");
+                        }
+                    } catch (FormatException) { error = true; }
+                      catch (ArgumentException) { error = true; }
+
+                    if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + textBox1.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }           
+            }           
+        }
+
+            private byte[] HexStringToByteArray(string s)
+            {
+
+                s = s.Replace(" ", "");
+                byte[] buffer = new byte[s.Length / 2];
+                for (int i = 0; i < s.Length; i += 2)
+                    buffer[i / 2] = (byte)Convert.ToByte(s.Substring(i, 2), 16);
+                return buffer;
+
+            }
+
+            //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
+            //The array of bytes to be translated into a string of hex digits. 
+            //Returns a well formatted string of hex digits with spacing. 
+            private string ByteArrayToHexString(byte[] data)
+            {
+                StringBuilder sb = new StringBuilder(data.Length * 3);
+                foreach (byte b in data)
+                    sb.Append(Convert.ToString(b, 16).PadLeft(2, '0').PadRight(3, ' '));
+                return sb.ToString().ToUpper();
+            }
+
+
+
+            private void metroButton7_Click(object sender, EventArgs e)
+        {
+            if(textBox1.Text != "")
+            {
+                textBox1.Text = "";
+            }
+        }
+
+        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            dataIN = serialPort1.ReadExisting();
+            this.Invoke(new EventHandler(ShowData));
+        }
+
+        private void ShowData(object sender, EventArgs e)
+        {
+            textBox1.ForeColor = Color.Red;
+            textBox1.Text += dataIN;
+        }
+
+        private void metroCheckBox7_CheckedChanged(object sender, EventArgs e)
+        {
+            if (metroCheckBox7.Checked == true)
+            {
+                metroComboBox10.Visible = false;
+            }
+            else
+            {
+                metroComboBox10.Visible = true;
             }
         }
     }
