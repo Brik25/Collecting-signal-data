@@ -35,6 +35,8 @@ namespace DesktopAPP
         
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
+        FolderBrowserDialog dialog;
+        
 
         private Mutex db_mtx = new Mutex();
 
@@ -42,10 +44,10 @@ namespace DesktopAPP
         string fprefix = "Test ";
         string dataOUT;
         string dataIN;
-
+        string converdata;
+        int num;
         struct Params
         {
-
             public int dac;
             public int dac_step;
             public int start_mode;
@@ -56,7 +58,7 @@ namespace DesktopAPP
             public string frequency;
             public int frequency2;
             public List<int> channels;
-
+            public string user_name;
         }
 
         protected void init_db()
@@ -82,7 +84,8 @@ namespace DesktopAPP
              "Podkl_idPodkl integer NOT NULL REFERENCES Podkl(idPodkl)," +
              "chan_num integer NOT NULL," +
              "Cap integer NOT NULL," +
-             "name varchar(45) NOT NULL" +
+             "name varchar(45) NOT NULL," +
+             "user_name varchar(45) NOT NULL"+
              ");" +
 
              "CREATE TABLE channel (" +
@@ -92,8 +95,7 @@ namespace DesktopAPP
              "file integer REFERENCES info_table(id)," +
              "input_voltage integer REFERENCES input_voltage(code)" +
              ");" +
-             "CREATE TABLE Com_ports (id integer primary key, commands varchar(45) NOT NULL);"
-             ;
+             "CREATE TABLE Com_ports (id integer primary key, commands varchar(45) NOT NULL);";
 
 
             cmd.CommandText = sql_create;
@@ -284,7 +286,7 @@ namespace DesktopAPP
         {
             if (metroCheckBox5.Checked == true)
             {
-                metroCheckBox5.Text = "ON";
+                metroCheckBox5.Text = "Серия экспериментов";
                 numericUpDown1.Value = 100;
                 numericUpDown1.Enabled = true;
                 metroLabel16.Visible = true;
@@ -292,7 +294,7 @@ namespace DesktopAPP
             }
             else
             {
-                metroCheckBox5.Text = "OFF";
+                metroCheckBox5.Text = "Одинарный эксперимент";
                 numericUpDown1.Value = 0;
                 numericUpDown1.Enabled = false;
                 metroLabel16.Visible = false;
@@ -364,6 +366,7 @@ namespace DesktopAPP
                 }
                 else
                 {
+                    num = 0;
                     new Thread(() => run_calculate()).Start();
                     metroButton2.Visible = true;
                 }
@@ -376,8 +379,10 @@ namespace DesktopAPP
 
         private void metroButton2_Click(object sender, EventArgs e)
         {
+            
             metroButton2.Visible = false;
             Interlocked.Exchange(ref computation_interrupt, 1);
+            
         }
 
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
@@ -441,10 +446,14 @@ namespace DesktopAPP
                 this.unlockGui(false);
             }));
 
-            string name = "Эксперимент";
-
-
-            convert(name);
+            string name = metroGrid1.CurrentRow.Cells[7].Value.ToString();
+            dialog = new FolderBrowserDialog();
+            dialog.Description = "Сохранить в:";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                converdata = dialog.SelectedPath;
+                convert(name);
+            }
 
 
             this.Invoke(new Action(() =>
@@ -519,13 +528,17 @@ namespace DesktopAPP
             process.WaitForExit();
 
             int tmp = i;
+            
 
-            new Task(() => insert_entry(i, prms)).Start();
+            
+            new Task(() => insert_entry(i,prms)).Start();
         }
-
+        
         private void insert_entry(int i, Params prms)
         {
 
+            num++;
+            
             db_mtx.WaitOne();
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
@@ -549,11 +562,36 @@ namespace DesktopAPP
                     k = 0;
                 channels_data[k].Add(data[n]);
             }
+            
+            if (metroTextBox2.Text == "")
+            {
+                if (metroCheckBox5.Checked == true)
+                {
+                    prms.user_name = "Серия_№ "+num;
+                }
+                else
+                {
+                    prms.user_name = "Эксперимент";
+                }
+                
+            }
+            else
+            {
+                
+                if (metroCheckBox5.Checked == true)
+                {
+                    prms.user_name = "Серия_" + metroTextBox2.Text+ "_№_" + num;
+                }
+                else
+                {
+                    prms.user_name = "Эксперимент_"+ metroTextBox2.Text;
+                }
+            }
 
             if (metroCheckBox5.Enabled == true)
             {
                 string insert_file_sql =
-                "insert into info_table (" +
+                "   insert into info_table (" +
                 "   Impul_idImpul," +
                 "   chast_idchast," +
                 "   Start_idStart," +
@@ -561,8 +599,9 @@ namespace DesktopAPP
                 "   Podkl_idPodkl," +
                 "   Cap," +
                 "   name," +
+                "   user_name,"+
                 "   chan_num) " +
-                "values (" +
+                "   values (" +
 
                 prms.pulse_type + "," +
                 prms.frequency2 + "," +
@@ -570,7 +609,8 @@ namespace DesktopAPP
                 prms.sync_type + "," +
                 prms.conn_type + "," +
                 i + ",'" +
-                fprefix + i + "'," +
+                fprefix + i + "','" +
+                prms.user_name+"',"+
                 prms.channels.Count +
                 ");";
 
@@ -647,10 +687,10 @@ namespace DesktopAPP
                 "znach_chast," +
                 "Cap," +
                 "start_name," +
-                "name_Podkl," +
-                "name_impu," +
                 "Synch_name," +
-                "name " +
+                "name_impu," +
+                "name_Podkl,"+
+                "user_name " +
                 "FROM info_table,Impul,chast,Start,Syncho,Podkl " +
 
                 "where info_table.Impul_idImpul = impul.idImpul " +
@@ -738,7 +778,7 @@ namespace DesktopAPP
                         result.Add(decnums);
                     }
 
-                    StreamWriter file = new StreamWriter(name + ".txt");
+                    StreamWriter file = new StreamWriter(converdata+"/" + name + ".txt");
 
                     string delim = "\t";
                     long minlength = long.MaxValue;
