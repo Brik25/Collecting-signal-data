@@ -46,6 +46,9 @@ namespace DesktopAPP
         string dataIN;
         string converdata;
         int num;
+        int check_value; //convert проверка на действие
+
+
         struct Params
         {
             public int dac;
@@ -137,10 +140,11 @@ namespace DesktopAPP
             cmd.ExecuteNonQuery();
             conn.Close();
         }
-
+        
         public Form1()
         {
             InitializeComponent();
+            
 
             if (!File.Exists("test.db"))
             {
@@ -220,7 +224,10 @@ namespace DesktopAPP
             metroComboBox2.Enabled = false;
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
-
+            numericUpDown1.Maximum = 1000;
+            numericUpDown2.Minimum = 1;
+            numericUpDown2.Maximum = 10;
+            
 
             //COM ports
             string[] ports = SerialPort.GetPortNames();
@@ -230,12 +237,14 @@ namespace DesktopAPP
             metroComboBox14.SelectedIndex = 0;
             metroComboBox15.SelectedIndex = 0;
             metroCheckBox7.Checked = true;
-            groupBox4.Enabled = false;
+            groupBox4.Enabled = false;          
+
 
         }
 
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
+           
             if (metroCheckBox1.Checked == true)
             {
                 metroComboBox1.Enabled = true;
@@ -286,11 +295,12 @@ namespace DesktopAPP
         {
             if (metroCheckBox5.Checked == true)
             {
-                metroCheckBox5.Text = "Серия экспериментов";
+                metroCheckBox5.Text = "Серия экспериментов";               
                 numericUpDown1.Value = 100;
                 numericUpDown1.Enabled = true;
                 metroLabel16.Visible = true;
                 metroLabel9.Visible = false;
+                
             }
             else
             {
@@ -339,41 +349,57 @@ namespace DesktopAPP
 
         private void metroButton1_Click(object sender, EventArgs e)
         {
-            Params prms = get_params();
 
+            List<int> start_button = new List<int>();
+            if (metroCheckBox1.Checked == true)
+                start_button.Add(1);
+            if (metroCheckBox2.Checked == true)
+                start_button.Add(2);
+            if (metroCheckBox3.Checked == true)
+                start_button.Add(3);
+            if (metroCheckBox4.Checked == true)
+                start_button.Add(4);
 
-            if (metroComboBox1.SelectedIndex == 0)
+            if (start_button.Count == 0)
             {
-                max_value = 3000;
+                MessageBox.Show("Не выбран ни один канал","Error", MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
-            else if (metroComboBox1.SelectedIndex == 1)
+            else
             {
-                max_value = 1000;
-            }
-            else if (metroComboBox1.SelectedIndex == 2)
-            {
-                max_value = 300;
-            }
-            try
-            {
-                if (max_value < prms.dac)
+                Params prms = get_params();
+                if (metroComboBox1.SelectedIndex == 0)
                 {
-                    MessageBox.Show("Значение ЦАП не может превышать размер входящего напряжения", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    max_value = 3000;
                 }
-                else if (prms.dac_step > prms.dac)
+                else if (metroComboBox1.SelectedIndex == 1)
                 {
-                    MessageBox.Show("Значение шага для ЦАП не может превышать парметра ЦАП", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    max_value = 1000;
                 }
-                else
+                else if (metroComboBox1.SelectedIndex == 2)
                 {
-                    num = 0;
-                    new Thread(() => run_calculate()).Start();
-                    metroButton2.Visible = true;
+                    max_value = 300;
                 }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Значения для ЦАП или его шаг,не были указаны", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try
+                {
+                    if (max_value < prms.dac)
+                    {
+                        MessageBox.Show("Значение ЦАП не может превышать размер входящего напряжения", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else if (prms.dac_step > prms.dac)
+                    {
+                        MessageBox.Show("Значение шага для ЦАП не может превышать парметра ЦАП", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        num = 0;
+                        new Thread(() => run_calculate()).Start();
+                        metroButton2.Visible = true;
+                    }
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Значения для ЦАП или его шаг,не были указаны", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -385,10 +411,15 @@ namespace DesktopAPP
             
         }
 
+        
+       
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            try
+
+            DialogResult dialog = MessageBox.Show("Вы хотите удалить данный эксперимент?", "Удаление", MessageBoxButtons.YesNo);
+            if (dialog == DialogResult.Yes)
             {
+
                 int ind = metroGrid1.SelectedCells[0].RowIndex;
                 string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
                 metroGrid1.Rows.RemoveAt(ind);
@@ -398,11 +429,12 @@ namespace DesktopAPP
                 SQLiteCommand cmd = new SQLiteCommand(delete, conn);
                 cmd.ExecuteNonQuery();
                 conn.Close();
-            }
-            catch
+
+            }else 
             {
-                MessageBox.Show("Не выбран эксперимент", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+               
             }
+
         }
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
@@ -416,7 +448,8 @@ namespace DesktopAPP
                     this.unlockGui(false);
                 }));
                 string name = "Grpth";
-                convert(name);
+                check_value = 1;
+                convert(name,check_value);
                 ReadClass rc = new ReadClass();
                 MWCharArray mlfname = new MWCharArray(name + ".txt");
                 rc.read(0, mlfname);
@@ -432,9 +465,18 @@ namespace DesktopAPP
 
         private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            metroCheckBox6.Checked = true;
-            metroCheckBox5.Enabled = false;
-            new Thread(() => run_calculate()).Start();
+            DialogResult dialog = MessageBox.Show("Вы хотите переснять данный эксперимент?", "Переснять", MessageBoxButtons.YesNo);
+            if (dialog == DialogResult.Yes)
+            {
+                metroCheckBox6.Checked = true;
+                metroCheckBox5.Enabled = false;
+                new Thread(() => run_calculate()).Start();
+            }
+            else
+            {
+
+            }
+
         }
 
         private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
@@ -451,11 +493,12 @@ namespace DesktopAPP
             dialog.Description = "Сохранить в:";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
+                check_value = 0;
                 converdata = dialog.SelectedPath;
-                convert(name);
+                convert(name,check_value);
+                MessageBox.Show("Данные сохранены успешно! ");
             }
-
-
+            
             this.Invoke(new Action(() =>
             {
                 metroButton2.Visible = false;
@@ -513,7 +556,8 @@ namespace DesktopAPP
                 + " -g " + prms.sync_type
                 + " -z " + prms.conn_type
                 + " -p " + fprefix
-                + " -q " + datadir;
+                + " -q " + datadir
+                + " -time " + numericUpDown2.Value;
             param += " -ca " + i;
 
             //  Console.WriteLine(param);
@@ -537,13 +581,11 @@ namespace DesktopAPP
         private void insert_entry(int i, Params prms)
         {
 
-            num++;
-            
+            num++;            
             db_mtx.WaitOne();
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
-
-
+            
             var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
 
             List<byte>[] channels_data = new List<byte>[prms.channels.Count];
@@ -721,13 +763,12 @@ namespace DesktopAPP
                 {
                     metroGrid1.Rows.Add(s);
                 }));
-            metroGrid1.ClearSelection();
+           
         }
 
-        private void convert(string name)
+        private void convert(string name,int check_value)
         {
-            try
-            {
+            
                 string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
                 SQLiteCommand cmd = new SQLiteCommand(
@@ -778,7 +819,15 @@ namespace DesktopAPP
                         result.Add(decnums);
                     }
 
-                    StreamWriter file = new StreamWriter(converdata+"/" + name + ".txt");
+                StreamWriter file;
+
+                if (check_value == 0)
+                {
+                    file = new StreamWriter(converdata + "/" + name + ".txt");
+                }else
+                {
+                    file = new StreamWriter(name + ".txt");
+                }
 
                     string delim = "\t";
                     long minlength = long.MaxValue;
@@ -814,11 +863,8 @@ namespace DesktopAPP
 
                 }
                 conn.Close();
-            }
-            catch
-            {
-                MessageBox.Show("База данных пуста", "База данных пуста", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            
+          
         }
 
         static byte[] GetBytes(SQLiteDataReader reader)
@@ -1013,6 +1059,15 @@ namespace DesktopAPP
             {
                 metroComboBox10.Visible = true;
             }
+        }
+
+        private void metroTextBox2_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //запрет ввода спец символов ,иначе смерть
+            if  (e.KeyChar == ':' || e.KeyChar == '/' || e.KeyChar == '*' || e.KeyChar == '?' || e.KeyChar == '"' || e.KeyChar == '<' || e.KeyChar == '>' || e.KeyChar == '|')
+            {
+                e.Handled = true;
+            }  
         }
     }
 }
