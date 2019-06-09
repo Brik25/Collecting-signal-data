@@ -227,8 +227,7 @@ namespace DesktopAPP
             numericUpDown1.Maximum = 1000;
             numericUpDown2.Minimum = 1;
             numericUpDown2.Maximum = 10;
-            
-
+           
             //COM ports
             string[] ports = SerialPort.GetPortNames();
             metroComboBox11.Items.AddRange(ports);
@@ -237,10 +236,10 @@ namespace DesktopAPP
             metroComboBox14.SelectedIndex = 0;
             metroComboBox15.SelectedIndex = 0;
             metroCheckBox7.Checked = true;
-            groupBox4.Enabled = false;          
-
-
+            groupBox4.Enabled = false;
         }
+
+     
 
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
