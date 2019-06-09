@@ -5,7 +5,7 @@ GUI для идентификации параметров ПЭД
 Начало разработки: 03.11.18
 Окончание разработки:13.06.19
 Стадия разработки: бета версия
-Дата последней модификации:07.04.2019
+Дата последней модификации:09.06.2019
 
 */
 
@@ -25,6 +25,7 @@ using read;
 using System.IO.Ports;
 using System.Drawing;
 using System.Text;
+using System.Management;
 
 namespace DesktopAPP
 {
@@ -32,11 +33,11 @@ namespace DesktopAPP
     {
         int computation_interrupt = 0;
         int max_value;
-        
+
         SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
         SQLiteDataReader re;
         FolderBrowserDialog dialog;
-        
+
 
         private Mutex db_mtx = new Mutex();
 
@@ -88,7 +89,7 @@ namespace DesktopAPP
              "chan_num integer NOT NULL," +
              "Cap integer NOT NULL," +
              "name varchar(45) NOT NULL," +
-             "user_name varchar(45) NOT NULL"+
+             "user_name varchar(45) NOT NULL" +
              ");" +
 
              "CREATE TABLE channel (" +
@@ -140,11 +141,11 @@ namespace DesktopAPP
             cmd.ExecuteNonQuery();
             conn.Close();
         }
-        
+
         public Form1()
         {
             InitializeComponent();
-            
+
 
             if (!File.Exists("test.db"))
             {
@@ -220,14 +221,14 @@ namespace DesktopAPP
             metroComboBox6.SelectedIndex = 0;
             metroComboBox7.SelectedIndex = 0;
             metroComboBox8.SelectedIndex = 0;
-            metroComboBox9.SelectedIndex = 1;         
+            metroComboBox9.SelectedIndex = 1;
             metroComboBox2.Enabled = false;
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
             numericUpDown1.Maximum = 1000;
             numericUpDown2.Minimum = 1;
             numericUpDown2.Maximum = 10;
-           
+
             //COM ports
             string[] ports = SerialPort.GetPortNames();
             metroComboBox11.Items.AddRange(ports);
@@ -237,13 +238,16 @@ namespace DesktopAPP
             metroComboBox15.SelectedIndex = 0;
             metroCheckBox7.Checked = true;
             groupBox4.Enabled = false;
+
+            
+                check_device();
         }
 
-     
+
 
         private void metroCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
-           
+
             if (metroCheckBox1.Checked == true)
             {
                 metroComboBox1.Enabled = true;
@@ -294,12 +298,12 @@ namespace DesktopAPP
         {
             if (metroCheckBox5.Checked == true)
             {
-                metroCheckBox5.Text = "Серия экспериментов";               
+                metroCheckBox5.Text = "Серия экспериментов";
                 numericUpDown1.Value = 100;
                 numericUpDown1.Enabled = true;
                 metroLabel16.Visible = true;
                 metroLabel9.Visible = false;
-                
+
             }
             else
             {
@@ -348,70 +352,78 @@ namespace DesktopAPP
 
         private void metroButton1_Click(object sender, EventArgs e)
         {
-
-            List<int> start_button = new List<int>();
-            if (metroCheckBox1.Checked == true)
-                start_button.Add(1);
-            if (metroCheckBox2.Checked == true)
-                start_button.Add(2);
-            if (metroCheckBox3.Checked == true)
-                start_button.Add(3);
-            if (metroCheckBox4.Checked == true)
-                start_button.Add(4);
-
-            if (start_button.Count == 0)
+            check_device();
+            if (metroLabel24.Text == "E20-10")
             {
-                MessageBox.Show("Не выбран ни один канал","Error", MessageBoxButtons.OK,MessageBoxIcon.Error);
+
+                List<int> start_button = new List<int>();
+                if (metroCheckBox1.Checked == true)
+                    start_button.Add(1);
+                if (metroCheckBox2.Checked == true)
+                    start_button.Add(2);
+                if (metroCheckBox3.Checked == true)
+                    start_button.Add(3);
+                if (metroCheckBox4.Checked == true)
+                    start_button.Add(4);
+
+                if (start_button.Count == 0)
+                {
+                    MessageBox.Show("Не выбран ни один канал", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else
+                {
+                    Params prms = get_params();
+                    if (metroComboBox1.SelectedIndex == 0)
+                    {
+                        max_value = 3000;
+                    }
+                    else if (metroComboBox1.SelectedIndex == 1)
+                    {
+                        max_value = 1000;
+                    }
+                    else if (metroComboBox1.SelectedIndex == 2)
+                    {
+                        max_value = 300;
+                    }
+                    try
+                    {
+                        if (max_value < prms.dac)
+                        {
+                            MessageBox.Show("Значение ЦАП не может превышать размер входящего напряжения", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else if (prms.dac_step > prms.dac)
+                        {
+                            MessageBox.Show("Значение шага для ЦАП не может превышать парметра ЦАП", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            num = 0;
+                            new Thread(() => run_calculate()).Start();
+                            metroButton2.Visible = true;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Значения для ЦАП или его шаг,не были указаны", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
-            else
+            else 
             {
-                Params prms = get_params();
-                if (metroComboBox1.SelectedIndex == 0)
-                {
-                    max_value = 3000;
-                }
-                else if (metroComboBox1.SelectedIndex == 1)
-                {
-                    max_value = 1000;
-                }
-                else if (metroComboBox1.SelectedIndex == 2)
-                {
-                    max_value = 300;
-                }
-                try
-                {
-                    if (max_value < prms.dac)
-                    {
-                        MessageBox.Show("Значение ЦАП не может превышать размер входящего напряжения", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else if (prms.dac_step > prms.dac)
-                    {
-                        MessageBox.Show("Значение шага для ЦАП не может превышать парметра ЦАП", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    else
-                    {
-                        num = 0;
-                        new Thread(() => run_calculate()).Start();
-                        metroButton2.Visible = true;
-                    }
-                }
-                catch (Exception)
-                {
-                    MessageBox.Show("Значения для ЦАП или его шаг,не были указаны", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show("Ошибка с модулем L-Card,проверьте подключение!","Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
         }
 
         private void metroButton2_Click(object sender, EventArgs e)
         {
-            
+
             metroButton2.Visible = false;
             Interlocked.Exchange(ref computation_interrupt, 1);
-            
+
         }
 
-        
-       
+
+
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
@@ -429,9 +441,10 @@ namespace DesktopAPP
                 cmd.ExecuteNonQuery();
                 conn.Close();
 
-            }else 
+            }
+            else
             {
-               
+
             }
 
         }
@@ -448,7 +461,7 @@ namespace DesktopAPP
                 }));
                 string name = "Grpth";
                 check_value = 1;
-                convert(name,check_value);
+                convert(name, check_value);
                 ReadClass rc = new ReadClass();
                 MWCharArray mlfname = new MWCharArray(name + ".txt");
                 rc.read(0, mlfname);
@@ -494,10 +507,10 @@ namespace DesktopAPP
             {
                 check_value = 0;
                 converdata = dialog.SelectedPath;
-                convert(name,check_value);
+                convert(name, check_value);
                 MessageBox.Show("Данные сохранены успешно! ");
             }
-            
+
             this.Invoke(new Action(() =>
             {
                 metroButton2.Visible = false;
@@ -571,149 +584,164 @@ namespace DesktopAPP
             process.WaitForExit();
 
             int tmp = i;
-            
+
 
             
-            new Task(() => insert_entry(i,prms)).Start();
+                new Task(() => insert_entry(i, prms)).Start();
+            
+           
         }
-        
+
         private void insert_entry(int i, Params prms)
         {
-
-            num++;            
-            db_mtx.WaitOne();
-            conn.Open();
-            SQLiteCommand cmd = new SQLiteCommand(conn);
-            
-            var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
-
-            List<byte>[] channels_data = new List<byte>[prms.channels.Count];
-            for (int n = 0; n < prms.channels.Count; ++n)
+            try
             {
-                channels_data[n] = new List<byte>();
-            }
-            for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
-            {
-                if (m == 2)
+                num++;
+                db_mtx.WaitOne();
+                conn.Open();
+                SQLiteCommand cmd = new SQLiteCommand(conn);
+
+                var data = File.ReadAllBytes(datadir + "/" + fprefix + i + ".dat");
+
+                List<byte>[] channels_data = new List<byte>[prms.channels.Count];
+                for (int n = 0; n < prms.channels.Count; ++n)
                 {
-                    ++k;
-                    m = 0;
+                    channels_data[n] = new List<byte>();
                 }
-                if (k == prms.channels.Count)
-                    k = 0;
-                channels_data[k].Add(data[n]);
-            }
-            
-            if (metroTextBox2.Text == "")
-            {
-                if (metroCheckBox5.Checked == true)
+                for (int n = 0, m = 0, k = 0; n < data.Length; ++n, ++m)
                 {
-                    prms.user_name = "Серия_№ "+num;
+                    if (m == 2)
+                    {
+                        ++k;
+                        m = 0;
+                    }
+                    if (k == prms.channels.Count)
+                        k = 0;
+                    channels_data[k].Add(data[n]);
+                }
+
+                if (metroTextBox2.Text == "")
+                {
+                    if (metroCheckBox5.Checked == true)
+                    {
+                        prms.user_name = "Серия_№ " + num;
+                    }
+                    else
+                    {
+                        prms.user_name = "Эксперимент";
+                    }
+
                 }
                 else
                 {
-                    prms.user_name = "Эксперимент";
+
+                    if (metroCheckBox5.Checked == true)
+                    {
+                        prms.user_name = "Серия_" + metroTextBox2.Text + "_№_" + num;
+                    }
+                    else
+                    {
+                        prms.user_name = "Эксперимент_" + metroTextBox2.Text;
+                    }
                 }
-                
-            }
-            else
-            {
-                
-                if (metroCheckBox5.Checked == true)
+
+                if (metroCheckBox5.Enabled == true)
                 {
-                    prms.user_name = "Серия_" + metroTextBox2.Text+ "_№_" + num;
+                    try
+                    {
+                        string insert_file_sql =
+                        "   insert into info_table (" +
+                        "   Impul_idImpul," +
+                        "   chast_idchast," +
+                        "   Start_idStart," +
+                        "   Syncho_idSyncho," +
+                        "   Podkl_idPodkl," +
+                        "   Cap," +
+                        "   name," +
+                        "   user_name," +
+                        "   chan_num) " +
+                        "   values (" +
+
+                        prms.pulse_type + "," +
+                        prms.frequency2 + "," +
+                        prms.start_mode + "," +
+                        prms.sync_type + "," +
+                        prms.conn_type + "," +
+                        i + ",'" +
+                        fprefix + i + "','" +
+                        prms.user_name + "'," +
+                        prms.channels.Count +
+                        ");";
+
+                        cmd.CommandText = insert_file_sql;
+                        cmd.ExecuteNonQuery();
+
+                        cmd.CommandText = "select last_insert_rowid()";
+                        long file_id = (long)cmd.ExecuteScalar();
+
+                        for (int n = 0; n < prms.channels.Count; ++n)
+                        {
+                            string upload_sql =
+                                "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                            cmd.CommandText = upload_sql;
+                            byte[] channel_data = channels_data[n].ToArray();
+                            cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    catch
+                    {
+
+                    }
+
                 }
-                else
+                else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
                 {
-                    prms.user_name = "Эксперимент_"+ metroTextBox2.Text;
-                }
-            }
-
-            if (metroCheckBox5.Enabled == true)
-            {
-                string insert_file_sql =
-                "   insert into info_table (" +
-                "   Impul_idImpul," +
-                "   chast_idchast," +
-                "   Start_idStart," +
-                "   Syncho_idSyncho," +
-                "   Podkl_idPodkl," +
-                "   Cap," +
-                "   name," +
-                "   user_name,"+
-                "   chan_num) " +
-                "   values (" +
-
-                prms.pulse_type + "," +
-                prms.frequency2 + "," +
-                prms.start_mode + "," +
-                prms.sync_type + "," +
-                prms.conn_type + "," +
-                i + ",'" +
-                fprefix + i + "','" +
-                prms.user_name+"',"+
-                prms.channels.Count +
-                ");";
-
-                cmd.CommandText = insert_file_sql;
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "select last_insert_rowid()";
-                long file_id = (long)cmd.ExecuteScalar();
-
-                for (int n = 0; n < prms.channels.Count; ++n)
-                {
-                    string upload_sql =
-                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + file_id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
-                    cmd.CommandText = upload_sql;
-                    byte[] channel_data = channels_data[n].ToArray();
-                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                    string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+                    string delete = "Delete FROM channel where file = " + id;
+                    cmd.CommandText = delete;
                     cmd.ExecuteNonQuery();
-                }
 
-            }
-            else if (metroCheckBox6.Checked == true && metroCheckBox5.Enabled == false)
-            {
-                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-                string delete = "Delete FROM channel where file = " + id;
-                cmd.CommandText = delete;
-                cmd.ExecuteNonQuery();
-
-                string update_file_sql =
-                                        "UPDATE info_table SET " +
-                                        "impul_idImpul='" + prms.pulse_type + "'," +
-                                        "chast_idchast='" + prms.frequency2 + "'," +
-                                        "Start_idStart='" + prms.start_mode + "'," +
-                                        "Syncho_idSyncho='" + prms.sync_type + "'," +
-                                        "Podkl_idPodkl='" + prms.conn_type + "'," +
-                                        "Cap='" + i + "'," +
-                                        "name='" + fprefix + i + "'," +
-                                        "chan_num='" + prms.channels.Count + "' " +
-                                        "WHERE id ='" + id + "'";
-                cmd.CommandText = update_file_sql;
-                cmd.ExecuteNonQuery();
-
-                for (int n = 0; n < prms.channels.Count; ++n)
-                {
-                    string upload_sql =
-                        "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
-                    cmd.CommandText = upload_sql;
-                    byte[] channel_data = channels_data[n].ToArray();
-                    cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                    string update_file_sql =
+                                            "UPDATE info_table SET " +
+                                            "impul_idImpul='" + prms.pulse_type + "'," +
+                                            "chast_idchast='" + prms.frequency2 + "'," +
+                                            "Start_idStart='" + prms.start_mode + "'," +
+                                            "Syncho_idSyncho='" + prms.sync_type + "'," +
+                                            "Podkl_idPodkl='" + prms.conn_type + "'," +
+                                            "Cap='" + i + "'," +
+                                            "name='" + fprefix + i + "'," +
+                                            "chan_num='" + prms.channels.Count + "' " +
+                                            "WHERE id ='" + id + "'";
+                    cmd.CommandText = update_file_sql;
                     cmd.ExecuteNonQuery();
+
+                    for (int n = 0; n < prms.channels.Count; ++n)
+                    {
+                        string upload_sql =
+                            "insert into channel (data, num, file, input_voltage) values (@data, " + prms.channels[n] + ", " + id + ", " + prms.input_voltage[prms.channels[n] - 1] + ");";
+                        cmd.CommandText = upload_sql;
+                        byte[] channel_data = channels_data[n].ToArray();
+                        cmd.Parameters.Add("@data", DbType.Binary, channel_data.Length).Value = channel_data;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    this.Invoke(new Action(() =>
+                    {
+                        metroCheckBox6.Checked = false;
+                        metroCheckBox5.Enabled = true;
+                    }));
                 }
 
-                this.Invoke(new Action(() =>
-                {
-                    metroCheckBox6.Checked = false;
-                    metroCheckBox5.Enabled = true;
-                }));
+                UpdataMena();
+                conn.Close();
+                db_mtx.ReleaseMutex();
+                File.Delete(datadir + "/" + fprefix + i + ".dat");
             }
-
-            UpdataMena();
-            conn.Close();
-            db_mtx.ReleaseMutex();
-            File.Delete(datadir + "/" + fprefix + i + ".dat");
+            catch(Exception)
+            {
+                conn.Close();
+            }
         }
 
         private void UpdataMena()
@@ -730,7 +758,7 @@ namespace DesktopAPP
                 "start_name," +
                 "Synch_name," +
                 "name_impu," +
-                "name_Podkl,"+
+                "name_Podkl," +
                 "user_name " +
                 "FROM info_table,Impul,chast,Start,Syncho,Podkl " +
 
@@ -762,108 +790,109 @@ namespace DesktopAPP
                 {
                     metroGrid1.Rows.Add(s);
                 }));
-           
+            
         }
 
-        private void convert(string name,int check_value)
+        private void convert(string name, int check_value)
         {
-            
-                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
-                SQLiteCommand cmd = new SQLiteCommand(
-                    "SELECT data, input_voltage.value, num FROM channel " +
-                    "JOIN info_table ON channel.file = info_table.id " +
-                    "JOIN input_voltage ON channel.input_voltage = input_voltage.code " +
-                    "WHERE info_table.id = " + id, conn);
-                conn.Open();
+            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
 
-                using (var reader = cmd.ExecuteReader())
+            SQLiteCommand cmd = new SQLiteCommand(
+                "SELECT data, input_voltage.value, num FROM channel " +
+                "JOIN info_table ON channel.file = info_table.id " +
+                "JOIN input_voltage ON channel.input_voltage = input_voltage.code " +
+                "WHERE info_table.id = " + id, conn);
+            conn.Open();
+
+            using (var reader = cmd.ExecuteReader())
+            {
+
+                List<List<double>> result = new List<List<double>>();
+                List<string> header = new List<string>();
+
+                while (reader.Read())
                 {
+                    long input_voltage = (long)reader.GetValue(1);
+                    List<double> decnums = new List<double>();
 
-                    List<List<double>> result = new List<List<double>>();
-                    List<string> header = new List<string>();
+                    header.Add(reader.GetValue(2).ToString());
 
-                    while (reader.Read())
+                    byte[] bindata = GetBytes(reader);
+
+                    const int numbytes = 2;
+                    byte[] buf = new byte[numbytes];
+
+                    for (int i = 0, bytenum = 0; i < bindata.Length; ++i, ++bytenum)
                     {
-                        long input_voltage = (long)reader.GetValue(1);
-                        List<double> decnums = new List<double>();
-
-                        header.Add(reader.GetValue(2).ToString());
-
-                        byte[] bindata = GetBytes(reader);
-
-                        const int numbytes = 2;
-                        byte[] buf = new byte[numbytes];
-
-                        for (int i = 0, bytenum = 0; i < bindata.Length; ++i, ++bytenum)
+                        if (bytenum == numbytes)
                         {
-                            if (bytenum == numbytes)
+                            bytenum = 0;
+                            double val = BitConverter.ToInt16(buf, 0);
+
+                            if (metroCheckBox6.Enabled == true)
                             {
-                                bytenum = 0;
-                                double val = BitConverter.ToInt16(buf, 0);
-
-                                if (metroCheckBox6.Enabled == true)
-                                {
-                                    // val = val * input_voltage / 8000;
-                                }
-                                else
-                                {
-                                    val = val * input_voltage / 8000;
-                                }
-                                decnums.Add(val);
+                                // val = val * input_voltage / 8000;
                             }
-                            buf[bytenum] = bindata[i];
+                            else
+                            {
+                                val = val * input_voltage / 8000;
+                            }
+                            decnums.Add(val);
                         }
-
-                        result.Add(decnums);
+                        buf[bytenum] = bindata[i];
                     }
+
+                    result.Add(decnums);
+                }
 
                 StreamWriter file;
 
                 if (check_value == 0)
                 {
                     file = new StreamWriter(converdata + "/" + name + ".txt");
-                }else
+                }
+                else
                 {
                     file = new StreamWriter(name + ".txt");
                 }
 
-                    string delim = "\t";
-                    long minlength = long.MaxValue;
-                    for (int i = 0; i < result.Count; ++i)
+                string delim = "\t";
+                long minlength = long.MaxValue;
+                for (int i = 0; i < result.Count; ++i)
+                {
+                    if (result[i].Count < minlength)
                     {
-                        if (result[i].Count < minlength)
-                        {
-                            minlength = result[i].Count;
-                        }
+                        minlength = result[i].Count;
                     }
-                    for (int i = 0; i < header.Count; ++i)
+                }
+                for (int i = 0; i < header.Count; ++i)
+                {
+                    file.Write(header[i] + delim);
+                }
+                file.WriteLine();
+                for (int i = 0; i < minlength; ++i)
+                {
+                    for (int j = 0; j < result.Count; ++j)
                     {
-                        file.Write(header[i] + delim);
+                        string ldelim = delim;
+                        if (j == result.Count - 1)
+                        {
+                            ldelim = "";
+                        }
+
+                        result[j][i].ToString("G");
+                        file.Write(Convert.ToString(result[j][i]) + ldelim);
                     }
                     file.WriteLine();
-                    for (int i = 0; i < minlength; ++i)
-                    {
-                        for (int j = 0; j < result.Count; ++j)
-                        {
-                            string ldelim = delim;
-                            if (j == result.Count - 1)
-                            {
-                                ldelim = "";
-                            }
-
-                            result[j][i].ToString("G");
-                            file.Write(Convert.ToString(result[j][i]) + ldelim);
-                        }
-                        file.WriteLine();
-                    }
-                    file.Flush();
-                    file.Close();
-
                 }
-                conn.Close();
-            
-          
+                file.Flush();
+                file.Close();
+
+            }
+            conn.Close();
+
+
         }
 
         static byte[] GetBytes(SQLiteDataReader reader)
@@ -891,7 +920,7 @@ namespace DesktopAPP
 
         private void metroComboBox10_MouseClick(object sender, MouseEventArgs e)
         {
-            
+
             metroComboBox10.Items.Clear();
             conn.Open();
             SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
@@ -900,7 +929,7 @@ namespace DesktopAPP
             {
                 metroComboBox10.Items.Add(re.GetValue(0).ToString());
             }
-            conn.Close();       
+            conn.Close();
         }
 
         private void metroGrid1_MouseDown(object sender, MouseEventArgs e)
@@ -915,7 +944,7 @@ namespace DesktopAPP
                 {
                     metroContextMenu1.Enabled = true;
                 }
-                
+
             }
         }
 
@@ -923,7 +952,7 @@ namespace DesktopAPP
         private void metroButton5_Click(object sender, EventArgs e)
         {
             try
-            { 
+            {
                 //com ports param
                 serialPort1.PortName = metroComboBox11.Text;
                 serialPort1.BaudRate = Convert.ToInt32(metroComboBox12.Text);
@@ -996,41 +1025,42 @@ namespace DesktopAPP
                             textBox1.ForeColor = Color.Blue;
                             textBox1.AppendText(metroComboBox10.Text.ToUpper() + "\n");
                         }
-                    } catch (FormatException) { error = true; }
-                      catch (ArgumentException) { error = true; }
+                    }
+                    catch (FormatException) { error = true; }
+                    catch (ArgumentException) { error = true; }
 
                     if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + textBox1.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                }           
-            }           
+                }
+            }
         }
 
-            private byte[] HexStringToByteArray(string s)
-            {
-
-                s = s.Replace(" ", "");
-                byte[] buffer = new byte[s.Length / 2];
-                for (int i = 0; i < s.Length; i += 2)
-                    buffer[i / 2] = (byte)Convert.ToByte(s.Substring(i, 2), 16);
-                return buffer;
-
-            }
-
-            //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
-            //The array of bytes to be translated into a string of hex digits. 
-            //Returns a well formatted string of hex digits with spacing. 
-            private string ByteArrayToHexString(byte[] data)
-            {
-                StringBuilder sb = new StringBuilder(data.Length * 3);
-                foreach (byte b in data)
-                    sb.Append(Convert.ToString(b, 16).PadLeft(2, '0').PadRight(3, ' '));
-                return sb.ToString().ToUpper();
-            }
-
-
-
-            private void metroButton7_Click(object sender, EventArgs e)
+        private byte[] HexStringToByteArray(string s)
         {
-            if(textBox1.Text != "")
+
+            s = s.Replace(" ", "");
+            byte[] buffer = new byte[s.Length / 2];
+            for (int i = 0; i < s.Length; i += 2)
+                buffer[i / 2] = (byte)Convert.ToByte(s.Substring(i, 2), 16);
+            return buffer;
+
+        }
+
+        //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
+        //The array of bytes to be translated into a string of hex digits. 
+        //Returns a well formatted string of hex digits with spacing. 
+        private string ByteArrayToHexString(byte[] data)
+        {
+            StringBuilder sb = new StringBuilder(data.Length * 3);
+            foreach (byte b in data)
+                sb.Append(Convert.ToString(b, 16).PadLeft(2, '0').PadRight(3, ' '));
+            return sb.ToString().ToUpper();
+        }
+
+
+
+        private void metroButton7_Click(object sender, EventArgs e)
+        {
+            if (textBox1.Text != "")
             {
                 textBox1.Text = "";
             }
@@ -1063,11 +1093,32 @@ namespace DesktopAPP
         private void metroTextBox2_KeyPress(object sender, KeyPressEventArgs e)
         {
             //запрет ввода спец символов ,иначе смерть
-            if  (e.KeyChar == ':' || e.KeyChar == '/' || e.KeyChar == '*' || e.KeyChar == '?' || e.KeyChar == '"' || e.KeyChar == '<' || e.KeyChar == '>' || e.KeyChar == '|')
+            if (e.KeyChar == ':' || e.KeyChar == '/' || e.KeyChar == '*' || e.KeyChar == '?' || e.KeyChar == '"' || e.KeyChar == '<' || e.KeyChar == '>' || e.KeyChar == '|')
             {
                 e.Handled = true;
-            }  
+            }
+        }
+
+        void check_device()
+        {
+            metroLabel24.Text = "Disable";
+            metroLabel25.Text = "No";
+
+            ManagementObjectSearcher deviceList = new ManagementObjectSearcher("Select Name, Status from Win32_PnPEntity where Name = 'E20-10'");
+
+            if (deviceList != null)
+                foreach (ManagementObject device in deviceList.Get())
+                {
+                    string name = device.GetPropertyValue("Name").ToString();
+                    string status = device.GetPropertyValue("Status").ToString();
+
+                    metroLabel24.Text = name;
+                    metroLabel25.Text = status;
+                }
         }
     }
 }
+
+                   
+   
 
