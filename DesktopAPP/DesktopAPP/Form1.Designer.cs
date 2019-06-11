@@ -72,7 +72,6 @@
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.metroLabel7 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel6 = new MetroFramework.Controls.MetroLabel();
-            this.metroTextBox1 = new MetroFramework.Controls.MetroTextBox();
             this.metroLabel12 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel5 = new MetroFramework.Controls.MetroLabel();
             this.metroLabel13 = new MetroFramework.Controls.MetroLabel();
@@ -122,6 +121,9 @@
             this.metroTextBox3 = new MetroFramework.Controls.MetroTextBox();
             this.metroButton4 = new MetroFramework.Controls.MetroButton();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
+            this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
+            this.metroLabel28 = new MetroFramework.Controls.MetroLabel();
+            this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
             this.metroTabControl1.SuspendLayout();
             this.metroTabPage1.SuspendLayout();
             this.metroTabPage2.SuspendLayout();
@@ -138,6 +140,8 @@
             this.metroTabPage6.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             this.SuspendLayout();
             // 
             // metroTabControl1
@@ -372,14 +376,14 @@
             this.groupBox1.Controls.Add(this.metroButton1);
             this.groupBox1.Location = new System.Drawing.Point(9, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(480, 426);
+            this.groupBox1.Size = new System.Drawing.Size(480, 444);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             // 
             // metroLabel27
             // 
             this.metroLabel27.AutoSize = true;
-            this.metroLabel27.Location = new System.Drawing.Point(327, 354);
+            this.metroLabel27.Location = new System.Drawing.Point(335, 360);
             this.metroLabel27.Name = "metroLabel27";
             this.metroLabel27.Size = new System.Drawing.Size(46, 19);
             this.metroLabel27.TabIndex = 17;
@@ -388,7 +392,7 @@
             // metroLabel26
             // 
             this.metroLabel26.AutoSize = true;
-            this.metroLabel26.Location = new System.Drawing.Point(284, 335);
+            this.metroLabel26.Location = new System.Drawing.Point(292, 341);
             this.metroLabel26.Name = "metroLabel26";
             this.metroLabel26.Size = new System.Drawing.Size(90, 19);
             this.metroLabel26.TabIndex = 16;
@@ -397,7 +401,7 @@
             // metroLabel25
             // 
             this.metroLabel25.AutoSize = true;
-            this.metroLabel25.Location = new System.Drawing.Point(370, 354);
+            this.metroLabel25.Location = new System.Drawing.Point(378, 360);
             this.metroLabel25.Name = "metroLabel25";
             this.metroLabel25.Size = new System.Drawing.Size(27, 19);
             this.metroLabel25.TabIndex = 15;
@@ -406,7 +410,7 @@
             // metroLabel24
             // 
             this.metroLabel24.AutoSize = true;
-            this.metroLabel24.Location = new System.Drawing.Point(370, 335);
+            this.metroLabel24.Location = new System.Drawing.Point(378, 341);
             this.metroLabel24.Name = "metroLabel24";
             this.metroLabel24.Size = new System.Drawing.Size(51, 19);
             this.metroLabel24.TabIndex = 14;
@@ -495,7 +499,7 @@
             // 
             // metroButton2
             // 
-            this.metroButton2.Location = new System.Drawing.Point(241, 383);
+            this.metroButton2.Location = new System.Drawing.Point(249, 389);
             this.metroButton2.Name = "metroButton2";
             this.metroButton2.Size = new System.Drawing.Size(221, 37);
             this.metroButton2.TabIndex = 7;
@@ -554,15 +558,17 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.numericUpDown4);
+            this.groupBox2.Controls.Add(this.metroLabel28);
+            this.groupBox2.Controls.Add(this.numericUpDown3);
             this.groupBox2.Controls.Add(this.metroCheckBox5);
             this.groupBox2.Controls.Add(this.metroLabel14);
             this.groupBox2.Controls.Add(this.numericUpDown1);
             this.groupBox2.Controls.Add(this.metroLabel7);
             this.groupBox2.Controls.Add(this.metroLabel6);
-            this.groupBox2.Controls.Add(this.metroTextBox1);
             this.groupBox2.Location = new System.Drawing.Point(9, 315);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(226, 105);
+            this.groupBox2.Size = new System.Drawing.Size(226, 124);
             this.groupBox2.TabIndex = 9;
             this.groupBox2.TabStop = false;
             // 
@@ -571,7 +577,7 @@
             this.metroCheckBox5.AutoSize = true;
             this.metroCheckBox5.Checked = true;
             this.metroCheckBox5.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.metroCheckBox5.Location = new System.Drawing.Point(10, 24);
+            this.metroCheckBox5.Location = new System.Drawing.Point(49, 26);
             this.metroCheckBox5.Name = "metroCheckBox5";
             this.metroCheckBox5.Size = new System.Drawing.Size(145, 15);
             this.metroCheckBox5.TabIndex = 8;
@@ -590,9 +596,9 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(115, 74);
+            this.numericUpDown1.Location = new System.Drawing.Point(153, 74);
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(105, 20);
+            this.numericUpDown1.Size = new System.Drawing.Size(67, 20);
             this.numericUpDown1.TabIndex = 6;
             this.numericUpDown1.Value = new decimal(new int[] {
             100,
@@ -603,7 +609,7 @@
             // metroLabel7
             // 
             this.metroLabel7.AutoSize = true;
-            this.metroLabel7.Location = new System.Drawing.Point(44, 74);
+            this.metroLabel7.Location = new System.Drawing.Point(82, 75);
             this.metroLabel7.Name = "metroLabel7";
             this.metroLabel7.Size = new System.Drawing.Size(65, 19);
             this.metroLabel7.TabIndex = 5;
@@ -612,43 +618,11 @@
             // metroLabel6
             // 
             this.metroLabel6.AutoSize = true;
-            this.metroLabel6.Location = new System.Drawing.Point(10, 47);
+            this.metroLabel6.Location = new System.Drawing.Point(14, 48);
             this.metroLabel6.Name = "metroLabel6";
-            this.metroLabel6.Size = new System.Drawing.Size(101, 19);
+            this.metroLabel6.Size = new System.Drawing.Size(137, 19);
             this.metroLabel6.TabIndex = 0;
-            this.metroLabel6.Text = "Значение ЦАП";
-            // 
-            // metroTextBox1
-            // 
-            // 
-            // 
-            // 
-            this.metroTextBox1.CustomButton.Image = null;
-            this.metroTextBox1.CustomButton.Location = new System.Drawing.Point(83, 1);
-            this.metroTextBox1.CustomButton.Name = "";
-            this.metroTextBox1.CustomButton.Size = new System.Drawing.Size(21, 21);
-            this.metroTextBox1.CustomButton.Style = MetroFramework.MetroColorStyle.Blue;
-            this.metroTextBox1.CustomButton.TabIndex = 1;
-            this.metroTextBox1.CustomButton.Theme = MetroFramework.MetroThemeStyle.Light;
-            this.metroTextBox1.CustomButton.UseSelectable = true;
-            this.metroTextBox1.CustomButton.Visible = false;
-            this.metroTextBox1.Lines = new string[] {
-        "1000"};
-            this.metroTextBox1.Location = new System.Drawing.Point(115, 45);
-            this.metroTextBox1.MaxLength = 32767;
-            this.metroTextBox1.Name = "metroTextBox1";
-            this.metroTextBox1.PasswordChar = '\0';
-            this.metroTextBox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.metroTextBox1.SelectedText = "";
-            this.metroTextBox1.SelectionLength = 0;
-            this.metroTextBox1.SelectionStart = 0;
-            this.metroTextBox1.ShortcutsEnabled = true;
-            this.metroTextBox1.Size = new System.Drawing.Size(105, 23);
-            this.metroTextBox1.TabIndex = 4;
-            this.metroTextBox1.Text = "1000";
-            this.metroTextBox1.UseSelectable = true;
-            this.metroTextBox1.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
-            this.metroTextBox1.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
+            this.metroLabel6.Text = "Значение ЦАП(Мин)";
             // 
             // metroLabel12
             // 
@@ -699,7 +673,7 @@
             // 
             // metroButton1
             // 
-            this.metroButton1.Location = new System.Drawing.Point(241, 383);
+            this.metroButton1.Location = new System.Drawing.Point(249, 389);
             this.metroButton1.Name = "metroButton1";
             this.metroButton1.Size = new System.Drawing.Size(221, 37);
             this.metroButton1.TabIndex = 6;
@@ -870,7 +844,7 @@
             this.metroTabControl2.Location = new System.Drawing.Point(5, 54);
             this.metroTabControl2.Name = "metroTabControl2";
             this.metroTabControl2.SelectedIndex = 0;
-            this.metroTabControl2.Size = new System.Drawing.Size(1405, 480);
+            this.metroTabControl2.Size = new System.Drawing.Size(1405, 492);
             this.metroTabControl2.TabIndex = 9;
             this.metroTabControl2.UseSelectable = true;
             // 
@@ -884,7 +858,7 @@
             this.metroTabPage5.HorizontalScrollbarSize = 10;
             this.metroTabPage5.Location = new System.Drawing.Point(4, 38);
             this.metroTabPage5.Name = "metroTabPage5";
-            this.metroTabPage5.Size = new System.Drawing.Size(1397, 438);
+            this.metroTabPage5.Size = new System.Drawing.Size(1397, 450);
             this.metroTabPage5.TabIndex = 0;
             this.metroTabPage5.Text = "Плата сбора";
             this.metroTabPage5.VerticalScrollbarBarColor = true;
@@ -903,7 +877,7 @@
             this.metroTabPage6.HorizontalScrollbarSize = 10;
             this.metroTabPage6.Location = new System.Drawing.Point(4, 38);
             this.metroTabPage6.Name = "metroTabPage6";
-            this.metroTabPage6.Size = new System.Drawing.Size(1397, 438);
+            this.metroTabPage6.Size = new System.Drawing.Size(1397, 450);
             this.metroTabPage6.TabIndex = 1;
             this.metroTabPage6.Text = "COM-ports";
             this.metroTabPage6.VerticalScrollbarBarColor = true;
@@ -912,7 +886,7 @@
             // 
             // metroButton5
             // 
-            this.metroButton5.Location = new System.Drawing.Point(3, 236);
+            this.metroButton5.Location = new System.Drawing.Point(3, 242);
             this.metroButton5.Name = "metroButton5";
             this.metroButton5.Size = new System.Drawing.Size(319, 44);
             this.metroButton5.TabIndex = 16;
@@ -1063,7 +1037,7 @@
             // 
             // metroButton3
             // 
-            this.metroButton3.Location = new System.Drawing.Point(3, 286);
+            this.metroButton3.Location = new System.Drawing.Point(3, 292);
             this.metroButton3.Name = "metroButton3";
             this.metroButton3.Size = new System.Drawing.Size(319, 44);
             this.metroButton3.TabIndex = 11;
@@ -1073,7 +1047,7 @@
             // 
             // metroButton6
             // 
-            this.metroButton6.Location = new System.Drawing.Point(3, 236);
+            this.metroButton6.Location = new System.Drawing.Point(3, 242);
             this.metroButton6.Name = "metroButton6";
             this.metroButton6.Size = new System.Drawing.Size(319, 44);
             this.metroButton6.TabIndex = 17;
@@ -1094,7 +1068,7 @@
             this.groupBox4.Controls.Add(this.metroButton4);
             this.groupBox4.Location = new System.Drawing.Point(328, 21);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(511, 318);
+            this.groupBox4.Size = new System.Drawing.Size(915, 318);
             this.groupBox4.TabIndex = 20;
             this.groupBox4.TabStop = false;
             // 
@@ -1143,7 +1117,7 @@
             this.textBox1.Location = new System.Drawing.Point(6, 68);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(490, 241);
+            this.textBox1.Size = new System.Drawing.Size(903, 241);
             this.textBox1.TabIndex = 15;
             // 
             // metroComboBox10
@@ -1201,12 +1175,66 @@
             // 
             this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
             // 
+            // numericUpDown3
+            // 
+            this.numericUpDown3.Location = new System.Drawing.Point(153, 100);
+            this.numericUpDown3.Maximum = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            0});
+            this.numericUpDown3.Minimum = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDown3.Name = "numericUpDown3";
+            this.numericUpDown3.Size = new System.Drawing.Size(67, 20);
+            this.numericUpDown3.TabIndex = 9;
+            this.numericUpDown3.Value = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            0});
+            // 
+            // metroLabel28
+            // 
+            this.metroLabel28.AutoSize = true;
+            this.metroLabel28.Location = new System.Drawing.Point(10, 101);
+            this.metroLabel28.Name = "metroLabel28";
+            this.metroLabel28.Size = new System.Drawing.Size(140, 19);
+            this.metroLabel28.TabIndex = 10;
+            this.metroLabel28.Text = "Значение ЦАП(Макс)";
+            // 
+            // numericUpDown4
+            // 
+            this.numericUpDown4.Location = new System.Drawing.Point(153, 48);
+            this.numericUpDown4.Maximum = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            0});
+            this.numericUpDown4.Minimum = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDown4.Name = "numericUpDown4";
+            this.numericUpDown4.Size = new System.Drawing.Size(67, 20);
+            this.numericUpDown4.TabIndex = 11;
+            this.numericUpDown4.Value = new decimal(new int[] {
+            8000,
+            0,
+            0,
+            -2147483648});
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1432, 544);
+            this.ClientSize = new System.Drawing.Size(1432, 549);
             this.Controls.Add(this.metroTabControl2);
+            this.MinimumSize = new System.Drawing.Size(1432, 549);
             this.Name = "Form1";
             this.Text = "E20-10D";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -1235,6 +1263,8 @@
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1262,7 +1292,6 @@
         private MetroFramework.Controls.MetroLabel metroLabel8;
         private MetroFramework.Controls.MetroLabel metroLabel5;
         private MetroFramework.Controls.MetroComboBox metroComboBox5;
-        private MetroFramework.Controls.MetroTextBox metroTextBox1;
         private MetroFramework.Controls.MetroLabel metroLabel6;
         private MetroFramework.Controls.MetroLabel metroLabel13;
         private MetroFramework.Controls.MetroLabel metroLabel12;
@@ -1331,6 +1360,9 @@
         private MetroFramework.Controls.MetroLabel metroLabel24;
         private MetroFramework.Controls.MetroLabel metroLabel27;
         private MetroFramework.Controls.MetroLabel metroLabel26;
+        private MetroFramework.Controls.MetroLabel metroLabel28;
+        private System.Windows.Forms.NumericUpDown numericUpDown3;
+        private System.Windows.Forms.NumericUpDown numericUpDown4;
     }
 }
 

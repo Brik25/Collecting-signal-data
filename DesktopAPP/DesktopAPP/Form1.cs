@@ -225,9 +225,15 @@ namespace DesktopAPP
             metroComboBox2.Enabled = false;
             metroComboBox3.Enabled = false;
             metroComboBox4.Enabled = false;
-            numericUpDown1.Maximum = 1000;
+
+            numericUpDown1.Maximum = 2000;
+            numericUpDown1.Minimum = 100;
+            
             numericUpDown2.Minimum = 1;
             numericUpDown2.Maximum = 10;
+
+            numericUpDown3.Maximum = 8000;
+            numericUpDown3.Minimum = -8000;
 
             //COM ports
             string[] ports = SerialPort.GetPortNames();
@@ -239,8 +245,8 @@ namespace DesktopAPP
             metroCheckBox7.Checked = true;
             groupBox4.Enabled = false;
 
-            
-                check_device();
+            //статус девайса
+            check_device();
         }
 
 
@@ -301,6 +307,7 @@ namespace DesktopAPP
                 metroCheckBox5.Text = "Серия экспериментов";
                 numericUpDown1.Value = 100;
                 numericUpDown1.Enabled = true;
+                numericUpDown3.Enabled = true;
                 metroLabel16.Visible = true;
                 metroLabel9.Visible = false;
 
@@ -310,6 +317,8 @@ namespace DesktopAPP
                 metroCheckBox5.Text = "Одинарный эксперимент";
                 numericUpDown1.Value = 0;
                 numericUpDown1.Enabled = false;
+                
+                numericUpDown3.Enabled = false;
                 metroLabel16.Visible = false;
                 metroLabel9.Visible = true;
 
@@ -332,7 +341,7 @@ namespace DesktopAPP
                 prms.sync_type = metroComboBox7.SelectedIndex;
                 prms.pulse_type = metroComboBox8.SelectedIndex;
                 prms.conn_type = metroComboBox9.SelectedIndex;
-                prms.dac = Convert.ToInt32(metroTextBox1.Text); //Цап
+                prms.dac = Convert.ToInt32(numericUpDown4.Value); //Цап
                 prms.dac_step = Convert.ToInt32(numericUpDown1.Value); //шаг
 
                 prms.channels = new List<int>();
@@ -373,34 +382,17 @@ namespace DesktopAPP
                 else
                 {
                     Params prms = get_params();
-                    if (metroComboBox1.SelectedIndex == 0)
-                    {
-                        max_value = 3000;
-                    }
-                    else if (metroComboBox1.SelectedIndex == 1)
-                    {
-                        max_value = 1000;
-                    }
-                    else if (metroComboBox1.SelectedIndex == 2)
-                    {
-                        max_value = 300;
-                    }
+                    max_value = Convert.ToInt32(numericUpDown3.Value);
                     try
-                    {
-                        if (max_value < prms.dac)
+                    {               
+                        if(max_value < prms.dac)
                         {
-                            MessageBox.Show("Значение ЦАП не может превышать размер входящего напряжения", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Параметр максимального значения не может быть меньше минимального","Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
                         }
-                        else if (prms.dac_step > prms.dac)
-                        {
-                            MessageBox.Show("Значение шага для ЦАП не может превышать парметра ЦАП", "Ошибка параметров", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        else
-                        {
+
                             num = 0;
                             new Thread(() => run_calculate()).Start();
-                            metroButton2.Visible = true;
-                        }
+                            metroButton2.Visible = true;                       
                     }
                     catch (Exception)
                     {
@@ -624,7 +616,7 @@ namespace DesktopAPP
                 {
                     if (metroCheckBox5.Checked == true)
                     {
-                        prms.user_name = "Серия_№ " + num;
+                        prms.user_name = "Серия_ " + num;
                     }
                     else
                     {
@@ -637,7 +629,7 @@ namespace DesktopAPP
 
                     if (metroCheckBox5.Checked == true)
                     {
-                        prms.user_name = "Серия_" + metroTextBox2.Text + "_№_" + num;
+                        prms.user_name = "Серия_" + metroTextBox2.Text + "_" + num;
                     }
                     else
                     {
