@@ -522,7 +522,7 @@ namespace DesktopAPP
                     if (dialog == DialogResult.Yes)
                     {
                         convert(name, check_value);
-                        MessageBox.Show("Данные сохранены успешно! ");
+                        MessageBox.Show("Данные сохранены успешно!");
                     }
 
                 }
@@ -1123,6 +1123,15 @@ namespace DesktopAPP
                     metroLabel24.Text = name;
                     metroLabel25.Text = status;
                 }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult dialog = MessageBox.Show("Вы хотите закрыть программу?", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dialog == DialogResult.No)
+            {
+                e.Cancel=true;
+            }
         }
     }
 }
