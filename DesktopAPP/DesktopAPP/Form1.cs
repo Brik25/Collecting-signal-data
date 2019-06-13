@@ -227,14 +227,14 @@ namespace DesktopAPP
             metroComboBox4.Enabled = false;
 
             numericUpDown1.Maximum = 2000;
-            numericUpDown1.Minimum = 100;
+            numericUpDown1.Minimum = 0;
             
-            numericUpDown2.Minimum = 1;
-            numericUpDown2.Maximum = 10;
+            numericUpDown2.Minimum = 3;
+            numericUpDown2.Maximum = 100;
 
             numericUpDown3.Maximum = 8000;
             numericUpDown3.Minimum = -8000;
-
+            
             //COM ports
             string[] ports = SerialPort.GetPortNames();
             metroComboBox11.Items.AddRange(ports);
@@ -244,7 +244,7 @@ namespace DesktopAPP
             metroComboBox15.SelectedIndex = 0;
             metroCheckBox7.Checked = true;
             groupBox4.Enabled = false;
-
+           
             //статус девайса
             check_device();
         }
@@ -335,7 +335,7 @@ namespace DesktopAPP
                 prms.input_voltage[1] = metroComboBox2.SelectedIndex;
                 prms.input_voltage[2] = metroComboBox3.SelectedIndex;
                 prms.input_voltage[3] = metroComboBox4.SelectedIndex;
-                prms.frequency = metroComboBox5.Text;
+                prms.frequency = metroComboBox5.Text; //частота
                 prms.frequency2 = metroComboBox5.SelectedIndex;
                 prms.start_mode = metroComboBox6.SelectedIndex;
                 prms.sync_type = metroComboBox7.SelectedIndex;
@@ -377,7 +377,7 @@ namespace DesktopAPP
 
                 if (start_button.Count == 0)
                 {
-                    MessageBox.Show("Не выбран ни один канал", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Не выбран ни один канал", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
@@ -387,9 +387,10 @@ namespace DesktopAPP
                     {               
                         if(max_value < prms.dac)
                         {
-                            MessageBox.Show("Параметр максимального значения не может быть меньше минимального","Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                            MessageBox.Show("Параметр максимального значения не может быть меньше минимального", "Ошибка", MessageBoxButtons.OK,MessageBoxIcon.Error);
                         }
 
+                        
                             num = 0;
                             new Thread(() => run_calculate()).Start();
                             metroButton2.Visible = true;                       
@@ -402,7 +403,7 @@ namespace DesktopAPP
             }
             else 
             {
-                MessageBox.Show("Ошибка с модулем L-Card,проверьте подключение!","Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show("Ошибка с модулем L-Card,проверьте подключение!", "Ошибка", MessageBoxButtons.OK,MessageBoxIcon.Error);
             }
         }
 
@@ -415,30 +416,27 @@ namespace DesktopAPP
         }
 
 
+        void delete()
+        {
+            int ind = metroGrid1.SelectedCells[0].RowIndex;
+            string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
+            metroGrid1.Rows.RemoveAt(ind);
+            conn.Open();
+            string delete = "DELETE FROM info_table WHERE id='" + id + "';DELETE FROM channel WHERE file = '" + id + "'";
+
+            SQLiteCommand cmd = new SQLiteCommand(delete, conn);
+            cmd.ExecuteNonQuery();
+            conn.Close();
+        }
 
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-            DialogResult dialog = MessageBox.Show("Вы хотите удалить данный эксперимент?", "Удаление", MessageBoxButtons.YesNo);
+          
+            DialogResult dialog = MessageBox.Show("Вы хотите удалить данный эксперимент?", "Удаление", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialog == DialogResult.Yes)
             {
-
-                int ind = metroGrid1.SelectedCells[0].RowIndex;
-                string id = metroGrid1.CurrentRow.Cells[0].Value.ToString();
-                metroGrid1.Rows.RemoveAt(ind);
-                conn.Open();
-                string delete = "DELETE FROM info_table WHERE id='" + id + "';DELETE FROM channel WHERE file = '" + id + "'";
-
-                SQLiteCommand cmd = new SQLiteCommand(delete, conn);
-                cmd.ExecuteNonQuery();
-                conn.Close();
-
+                delete();
             }
-            else
-            {
-
-            }
-
         }
 
         private void графикToolStripMenuItem_Click(object sender, EventArgs e)
@@ -451,13 +449,28 @@ namespace DesktopAPP
                 {
                     this.unlockGui(false);
                 }));
-                string name = "Grpth";
-                check_value = 1;
-                convert(name, check_value);
-                ReadClass rc = new ReadClass();
-                MWCharArray mlfname = new MWCharArray(name + ".txt");
-                rc.read(0, mlfname);
-                File.Delete("Grpth.txt");
+                try
+                {
+                    string name = "Grpth";
+                    check_value = 1;
+                    convert(name, check_value);
+                    ReadClass rc = new ReadClass();
+                    MWCharArray mlfname = new MWCharArray(name + ".txt");
+                    rc.read(0, mlfname);
+                    File.Delete("Grpth.txt");
+                }
+                catch
+                {
+                    DialogResult dialog = MessageBox.Show("Данные для построения графика отсутствуют,причина:входной сигнал не пришел на модуль L-Card.Удалить эксперимент?", "Ошибка", MessageBoxButtons.YesNo,MessageBoxIcon.Error);
+                    if (dialog == DialogResult.Yes)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                           delete();
+                        }));
+
+                    }
+                }
                 this.Invoke(new Action(() =>
                 {
                     metroButton2.Visible = false;
@@ -469,18 +482,14 @@ namespace DesktopAPP
 
         private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult dialog = MessageBox.Show("Вы хотите переснять данный эксперимент?", "Переснять", MessageBoxButtons.YesNo);
+            DialogResult dialog = MessageBox.Show("Вы хотите переснять данный эксперимент?", "Переснять", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dialog == DialogResult.Yes)
             {
                 metroCheckBox6.Checked = true;
                 metroCheckBox5.Enabled = false;
                 new Thread(() => run_calculate()).Start();
             }
-            else
-            {
-
-            }
-
+            
         }
 
         private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
@@ -499,8 +508,25 @@ namespace DesktopAPP
             {
                 check_value = 0;
                 converdata = dialog.SelectedPath;
-                convert(name, check_value);
-                MessageBox.Show("Данные сохранены успешно! ");
+                string converdata2 = converdata + "/" + name + ".txt";
+                
+                if (!File.Exists(converdata2))
+                {
+                    convert(name, check_value);
+                    MessageBox.Show("Данные сохранены успешно! ");
+
+                }
+                else
+                {
+                    DialogResult dialog = MessageBox.Show("Такой файл существует,вы хотите перезаписать его?", "Перезаписать", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+                    if (dialog == DialogResult.Yes)
+                    {
+                        convert(name, check_value);
+                        MessageBox.Show("Данные сохранены успешно! ");
+                    }
+
+                }
+                
             }
 
             this.Invoke(new Action(() =>
@@ -512,7 +538,7 @@ namespace DesktopAPP
 
         private void unlockGui(bool state)
         {
-
+            metroContextMenu1.Enabled = state;
             metroButton1.Enabled = state;
         }
 
@@ -521,6 +547,7 @@ namespace DesktopAPP
             this.Invoke(new Action(() =>
             {
                 this.unlockGui(false);
+                    
             }));
             Params prms = get_params();
 
@@ -544,7 +571,7 @@ namespace DesktopAPP
             this.Invoke(new Action(() =>
             {
                 metroButton2.Visible = false;
-                this.unlockGui(true);
+                this.unlockGui(true);                
             }));
         }
 
@@ -576,12 +603,8 @@ namespace DesktopAPP
             process.WaitForExit();
 
             int tmp = i;
-
-
             
                 new Task(() => insert_entry(i, prms)).Start();
-            
-           
         }
 
         private void insert_entry(int i, Params prms)
@@ -931,12 +954,7 @@ namespace DesktopAPP
                 if (metroGrid1.Rows.Count == 0)
                 {
                     metroContextMenu1.Enabled = false;
-                }
-                else
-                {
-                    metroContextMenu1.Enabled = true;
-                }
-
+                }        
             }
         }
 
@@ -959,7 +977,7 @@ namespace DesktopAPP
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -977,8 +995,6 @@ namespace DesktopAPP
             bool error = false;
             if (serialPort1.IsOpen)
             {
-
-
                 if (metroCheckBox8.Checked == false)
                 {
 
