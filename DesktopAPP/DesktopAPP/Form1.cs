@@ -227,7 +227,7 @@ namespace DesktopAPP
             metroComboBox4.Enabled = false;
 
             numericUpDown1.Maximum = 2000;
-            numericUpDown1.Minimum = 0;
+            numericUpDown1.Minimum = 100;
             
             numericUpDown2.Minimum = 3;
             numericUpDown2.Maximum = 100;
@@ -305,6 +305,7 @@ namespace DesktopAPP
             if (metroCheckBox5.Checked == true)
             {
                 metroCheckBox5.Text = "Серия экспериментов";
+                numericUpDown1.Minimum = 100; 
                 numericUpDown1.Value = 100;
                 numericUpDown1.Enabled = true;
                 numericUpDown3.Enabled = true;
@@ -315,9 +316,9 @@ namespace DesktopAPP
             else
             {
                 metroCheckBox5.Text = "Одинарный эксперимент";
+                numericUpDown1.Minimum = 0;
                 numericUpDown1.Value = 0;
-                numericUpDown1.Enabled = false;
-                
+                numericUpDown1.Enabled = false;               
                 numericUpDown3.Enabled = false;
                 metroLabel16.Visible = false;
                 metroLabel9.Visible = true;
@@ -477,7 +478,6 @@ namespace DesktopAPP
                     this.unlockGui(true);
                 }));
             }
-
         }
 
         private void переснятьToolStripMenuItem_Click(object sender, EventArgs e)
@@ -488,8 +488,7 @@ namespace DesktopAPP
                 metroCheckBox6.Checked = true;
                 metroCheckBox5.Enabled = false;
                 new Thread(() => run_calculate()).Start();
-            }
-            
+            }            
         }
 
         private void экспортToolStripMenuItem_Click(object sender, EventArgs e)
@@ -514,7 +513,6 @@ namespace DesktopAPP
                 {
                     convert(name, check_value);
                     MessageBox.Show("Данные сохранены успешно! ");
-
                 }
                 else
                 {
@@ -524,9 +522,7 @@ namespace DesktopAPP
                         convert(name, check_value);
                         MessageBox.Show("Данные сохранены успешно!");
                     }
-
                 }
-                
             }
 
             this.Invoke(new Action(() =>
@@ -845,14 +841,11 @@ namespace DesktopAPP
                             bytenum = 0;
                             double val = BitConverter.ToInt16(buf, 0);
 
-                            if (metroCheckBox6.Enabled == true)
+                            if (metroCheckBox6.Enabled == false)
                             {
-                                // val = val * input_voltage / 8000;
+                               val = val * input_voltage / 8000;
                             }
-                            else
-                            {
-                                val = val * input_voltage / 8000;
-                            }
+                            
                             decnums.Add(val);
                         }
                         buf[bytenum] = bindata[i];
@@ -1132,6 +1125,13 @@ namespace DesktopAPP
             {
                 e.Cancel=true;
             }
+        }
+
+        private void metroButton8_Click(object sender, EventArgs e)
+        {
+            
+            Form3 faq = new Form3();
+            faq.Show();
         }
     }
 }

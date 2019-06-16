@@ -90,7 +90,6 @@
             this.metroGrid1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.metroGrid1.Size = new System.Drawing.Size(392, 175);
             this.metroGrid1.TabIndex = 0;
-          
             // 
             // Column1
             // 
@@ -188,6 +187,7 @@
             this.Controls.Add(this.metroLabel1);
             this.Controls.Add(this.metroTextBox1);
             this.Controls.Add(this.metroGrid1);
+            this.MaximizeBox = false;
             this.Name = "Form2";
             this.Resizable = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
