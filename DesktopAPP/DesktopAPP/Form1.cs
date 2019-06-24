@@ -26,6 +26,7 @@ using System.IO.Ports;
 using System.Drawing;
 using System.Text;
 using System.Management;
+using System.Reflection;
 
 namespace DesktopAPP
 {
@@ -34,10 +35,9 @@ namespace DesktopAPP
         int computation_interrupt = 0;
         int max_value;
 
-        SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
+        SQLiteConnection conn = new SQLiteConnection("Data Source=info_exp.db;Version=3;");
         SQLiteDataReader re;
         FolderBrowserDialog dialog;
-
 
         private Mutex db_mtx = new Mutex();
 
@@ -67,7 +67,7 @@ namespace DesktopAPP
 
         protected void init_db()
         {
-            SQLiteConnection.CreateFile("test.db");
+            SQLiteConnection.CreateFile("info_exp.db");
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
 
@@ -147,7 +147,7 @@ namespace DesktopAPP
             InitializeComponent();
 
 
-            if (!File.Exists("test.db"))
+            if (!File.Exists("info_exp.db"))
             {
                 init_db();
             }
@@ -247,6 +247,7 @@ namespace DesktopAPP
            
             //статус девайса
             check_device();
+
         }
 
 
@@ -468,9 +469,11 @@ namespace DesktopAPP
                         this.Invoke(new Action(() =>
                         {
                            delete();
+                           File.Delete("Grpth.txt");
                         }));
 
                     }
+                    File.Delete("Grpth.txt");
                 }
                 this.Invoke(new Action(() =>
                 {
@@ -572,8 +575,7 @@ namespace DesktopAPP
         }
 
         private void expirence(int i, Params prms)
-        {
-
+        {           
             string param =
                 "-j " + string.Join(",", prms.channels.ConvertAll(el => el.ToString()).ToArray())
                 + " -a " + prms.input_voltage[0] + "," + prms.input_voltage[1] + "," + prms.input_voltage[2] + "," + prms.input_voltage[3]
@@ -587,14 +589,12 @@ namespace DesktopAPP
                 + " -time " + numericUpDown2.Value;
             param += " -ca " + i;
 
-            //  Console.WriteLine(param);
-
             Process process = new Process();
             process.StartInfo.FileName = "cmd.exe";
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = false;
-            process.StartInfo.Arguments = "/C " + "C:\\Users\\Brik\\Desktop\\проги\\ReadData\\Debug\\ReadData.exe " + param;
+            process.StartInfo.Arguments = "/C "+ @"\ReadData\ReadData.exe " + param;
             process.Start();
             process.WaitForExit();
 
