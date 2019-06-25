@@ -70,6 +70,7 @@ namespace DesktopAPP
             SQLiteConnection.CreateFile("info_exp.db");
             conn.Open();
             SQLiteCommand cmd = new SQLiteCommand(conn);
+            
 
             string sql_create =
              "CREATE TABLE Start (idStart integer primary key,start_name varchar(45) NOT NULL);" +
@@ -242,7 +243,7 @@ namespace DesktopAPP
             metroComboBox13.SelectedIndex = 2;
             metroComboBox14.SelectedIndex = 0;
             metroComboBox15.SelectedIndex = 0;
-            metroCheckBox7.Checked = true;
+            Ruch.Checked = true;
             groupBox4.Enabled = false;
            
             //статус девайса
@@ -998,44 +999,48 @@ namespace DesktopAPP
             bool error = false;
             if (serialPort1.IsOpen)
             {
-                if (metroCheckBox8.Checked == false)
+                if (Hex.Checked == false)
                 {
 
-                    if (metroCheckBox7.Checked == true)
+                    if (Ruch.Checked == true)
                     {
-                        dataOUT = metroTextBox3.Text;
+                        dataOUT = richTextBox1.Text;
                         serialPort1.Write(dataOUT);
                         textBox1.ForeColor = Color.Green;
-                        textBox1.AppendText(metroTextBox3.Text + "\n");
+                        textBox1.AppendText("Команда:"+ richTextBox1.Text + "\n");
 
                     }
                     else
                     {
+
                         dataOUT = metroComboBox10.Text;
                         serialPort1.Write(dataOUT);
                         textBox1.ForeColor = Color.Green;
-                        textBox1.AppendText(metroComboBox10.Text + "\n");
+                        textBox1.AppendText("Команда:" + metroComboBox10.Text + "\n");
+
                     }
                 }
-                else
+                else            
                 {
                     try
                     {
-                        if (metroCheckBox7.Checked == true)
+                        if (Ruch.Checked == true)
                         {
-                            byte[] data = HexStringToByteArray(metroTextBox3.Text);
+                            byte[] data = HexStringToByteArray(richTextBox1.Text);
                             serialPort1.Write(data, 0, data.Length);
-                            textBox1.ForeColor = Color.Blue;
-                            textBox1.AppendText(metroTextBox3.Text.ToUpper() + "\n");
-                            metroTextBox3.Clear();
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + richTextBox1.Text.ToUpper()+"\n"); 
+                            
                         }
-                        else
+                         else
                         {
                             byte[] data = HexStringToByteArray(metroComboBox10.Text);
                             serialPort1.Write(data, 0, data.Length);
-                            textBox1.ForeColor = Color.Blue;
-                            textBox1.AppendText(metroComboBox10.Text.ToUpper() + "\n");
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox10.Text.ToUpper()+"\n"); 
+                            
                         }
+                       
                     }
                     catch (FormatException) { error = true; }
                     catch (ArgumentException) { error = true; }
@@ -1056,42 +1061,44 @@ namespace DesktopAPP
 
         }
 
-        //Converts an array of bytes into a formatted string of hex digits (example: E1 FF 1B)
-        //The array of bytes to be translated into a string of hex digits. 
-        //Returns a well formatted string of hex digits with spacing. 
-        private string ByteArrayToHexString(byte[] data)
-        {
-            StringBuilder sb = new StringBuilder(data.Length * 3);
-            foreach (byte b in data)
-                sb.Append(Convert.ToString(b, 16).PadLeft(2, '0').PadRight(3, ' '));
-            return sb.ToString().ToUpper();
-        }
-
-
-
         private void metroButton7_Click(object sender, EventArgs e)
         {
+
             if (textBox1.Text != "")
             {
                 textBox1.Text = "";
             }
+            if (textBox2.Text != "")
+            {
+                textBox2.Text = "";
+            }
+        }
+
+        private delegate void LineReceivedEvent(string POT);
+
+        private void LineReceived(string s)
+        {
+            textBox2.ForeColor = Color.Red;
+            textBox2.AppendText("Ответ:"+s+"\n");
+
         }
 
         private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            dataIN = serialPort1.ReadExisting();
-            this.Invoke(new EventHandler(ShowData));
+            Thread.Sleep(500);
+            int intBytes = serialPort1.BytesToRead;
+            byte[] bytes = new byte[intBytes];
+
+            serialPort1.Read(bytes, 0, intBytes);
+            string s = BitConverter.ToString(bytes);
+            this.BeginInvoke(new LineReceivedEvent(LineReceived), s);
         }
 
-        private void ShowData(object sender, EventArgs e)
-        {
-            textBox1.ForeColor = Color.Red;
-            textBox1.Text += dataIN;
-        }
+        
 
         private void metroCheckBox7_CheckedChanged(object sender, EventArgs e)
         {
-            if (metroCheckBox7.Checked == true)
+            if (Ruch.Checked == true)
             {
                 metroComboBox10.Visible = false;
             }

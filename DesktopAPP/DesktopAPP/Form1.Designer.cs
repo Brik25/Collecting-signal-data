@@ -119,15 +119,17 @@
             this.metroButton3 = new MetroFramework.Controls.MetroButton();
             this.metroButton6 = new MetroFramework.Controls.MetroButton();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.metroLabel22 = new MetroFramework.Controls.MetroLabel();
-            this.metroCheckBox8 = new MetroFramework.Controls.MetroCheckBox();
+            this.Hex = new MetroFramework.Controls.MetroCheckBox();
             this.metroButton7 = new MetroFramework.Controls.MetroButton();
-            this.metroCheckBox7 = new MetroFramework.Controls.MetroCheckBox();
+            this.Ruch = new MetroFramework.Controls.MetroCheckBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.metroComboBox10 = new MetroFramework.Controls.MetroComboBox();
-            this.metroTextBox3 = new MetroFramework.Controls.MetroTextBox();
             this.metroButton4 = new MetroFramework.Controls.MetroButton();
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.metroTabControl1.SuspendLayout();
             this.metroTabPage1.SuspendLayout();
             this.metroTabPage2.SuspendLayout();
@@ -147,6 +149,7 @@
             this.metroTabPage6.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // metroTabControl1
@@ -963,7 +966,7 @@
             this.metroTabControl2.Controls.Add(this.metroTabPage6);
             this.metroTabControl2.Location = new System.Drawing.Point(5, 54);
             this.metroTabControl2.Name = "metroTabControl2";
-            this.metroTabControl2.SelectedIndex = 0;
+            this.metroTabControl2.SelectedIndex = 1;
             this.metroTabControl2.Size = new System.Drawing.Size(1405, 492);
             this.metroTabControl2.TabIndex = 9;
             this.metroTabControl2.UseSelectable = true;
@@ -1180,19 +1183,28 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.groupBox4.Controls.Add(this.tableLayoutPanel1);
             this.groupBox4.Controls.Add(this.metroLabel22);
-            this.groupBox4.Controls.Add(this.metroCheckBox8);
+            this.groupBox4.Controls.Add(this.Hex);
             this.groupBox4.Controls.Add(this.metroButton7);
-            this.groupBox4.Controls.Add(this.metroCheckBox7);
-            this.groupBox4.Controls.Add(this.textBox1);
+            this.groupBox4.Controls.Add(this.Ruch);
             this.groupBox4.Controls.Add(this.metroComboBox10);
-            this.groupBox4.Controls.Add(this.metroTextBox3);
             this.groupBox4.Controls.Add(this.metroButton4);
+            this.groupBox4.Controls.Add(this.richTextBox1);
             this.groupBox4.Location = new System.Drawing.Point(325, 3);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(1069, 447);
             this.groupBox4.TabIndex = 20;
             this.groupBox4.TabStop = false;
+            // 
+            // textBox2
+            // 
+            this.textBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox2.Location = new System.Drawing.Point(3, 170);
+            this.textBox2.Multiline = true;
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(1051, 161);
+            this.textBox2.TabIndex = 22;
             // 
             // metroLabel22
             // 
@@ -1203,15 +1215,17 @@
             this.metroLabel22.TabIndex = 20;
             this.metroLabel22.Text = "Com-ports ответ";
             // 
-            // metroCheckBox8
+            // Hex
             // 
-            this.metroCheckBox8.AutoSize = true;
-            this.metroCheckBox8.Location = new System.Drawing.Point(104, 13);
-            this.metroCheckBox8.Name = "metroCheckBox8";
-            this.metroCheckBox8.Size = new System.Drawing.Size(43, 15);
-            this.metroCheckBox8.TabIndex = 21;
-            this.metroCheckBox8.Text = "Hex";
-            this.metroCheckBox8.UseSelectable = true;
+            this.Hex.AutoSize = true;
+            this.Hex.Checked = true;
+            this.Hex.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.Hex.Location = new System.Drawing.Point(104, 13);
+            this.Hex.Name = "Hex";
+            this.Hex.Size = new System.Drawing.Size(43, 15);
+            this.Hex.TabIndex = 21;
+            this.Hex.Text = "Hex";
+            this.Hex.UseSelectable = true;
             // 
             // metroButton7
             // 
@@ -1223,26 +1237,24 @@
             this.metroButton7.UseSelectable = true;
             this.metroButton7.Click += new System.EventHandler(this.metroButton7_Click);
             // 
-            // metroCheckBox7
+            // Ruch
             // 
-            this.metroCheckBox7.AutoSize = true;
-            this.metroCheckBox7.Location = new System.Drawing.Point(6, 13);
-            this.metroCheckBox7.Name = "metroCheckBox7";
-            this.metroCheckBox7.Size = new System.Drawing.Size(92, 15);
-            this.metroCheckBox7.TabIndex = 19;
-            this.metroCheckBox7.Text = "Ручной ввод";
-            this.metroCheckBox7.UseSelectable = true;
-            this.metroCheckBox7.CheckedChanged += new System.EventHandler(this.metroCheckBox7_CheckedChanged);
+            this.Ruch.AutoSize = true;
+            this.Ruch.Location = new System.Drawing.Point(6, 13);
+            this.Ruch.Name = "Ruch";
+            this.Ruch.Size = new System.Drawing.Size(92, 15);
+            this.Ruch.TabIndex = 19;
+            this.Ruch.Text = "Ручной ввод";
+            this.Ruch.UseSelectable = true;
+            this.Ruch.CheckedChanged += new System.EventHandler(this.metroCheckBox7_CheckedChanged);
             // 
             // textBox1
             // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox1.Location = new System.Drawing.Point(6, 68);
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox1.Location = new System.Drawing.Point(3, 3);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(1057, 366);
+            this.textBox1.Size = new System.Drawing.Size(1051, 161);
             this.textBox1.TabIndex = 15;
             // 
             // metroComboBox10
@@ -1255,36 +1267,6 @@
             this.metroComboBox10.TabIndex = 8;
             this.metroComboBox10.UseSelectable = true;
             this.metroComboBox10.MouseClick += new System.Windows.Forms.MouseEventHandler(this.metroComboBox10_MouseClick);
-            // 
-            // metroTextBox3
-            // 
-            // 
-            // 
-            // 
-            this.metroTextBox3.CustomButton.Image = null;
-            this.metroTextBox3.CustomButton.Location = new System.Drawing.Point(220, 1);
-            this.metroTextBox3.CustomButton.Name = "";
-            this.metroTextBox3.CustomButton.Size = new System.Drawing.Size(21, 21);
-            this.metroTextBox3.CustomButton.Style = MetroFramework.MetroColorStyle.Blue;
-            this.metroTextBox3.CustomButton.TabIndex = 1;
-            this.metroTextBox3.CustomButton.Theme = MetroFramework.MetroThemeStyle.Light;
-            this.metroTextBox3.CustomButton.UseSelectable = true;
-            this.metroTextBox3.CustomButton.Visible = false;
-            this.metroTextBox3.Lines = new string[0];
-            this.metroTextBox3.Location = new System.Drawing.Point(6, 33);
-            this.metroTextBox3.MaxLength = 32767;
-            this.metroTextBox3.Name = "metroTextBox3";
-            this.metroTextBox3.PasswordChar = '\0';
-            this.metroTextBox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.metroTextBox3.SelectedText = "";
-            this.metroTextBox3.SelectionLength = 0;
-            this.metroTextBox3.SelectionStart = 0;
-            this.metroTextBox3.ShortcutsEnabled = true;
-            this.metroTextBox3.Size = new System.Drawing.Size(242, 23);
-            this.metroTextBox3.TabIndex = 14;
-            this.metroTextBox3.UseSelectable = true;
-            this.metroTextBox3.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
-            this.metroTextBox3.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
             // 
             // metroButton4
             // 
@@ -1299,6 +1281,31 @@
             // serialPort1
             // 
             this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
+            // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Location = new System.Drawing.Point(6, 34);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(242, 29);
+            this.richTextBox1.TabIndex = 23;
+            this.richTextBox1.Text = "";
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.textBox1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.textBox2, 0, 1);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(6, 81);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1057, 334);
+            this.tableLayoutPanel1.TabIndex = 24;
             // 
             // Form1
             // 
@@ -1341,6 +1348,8 @@
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1401,7 +1410,6 @@
         private MetroFramework.Controls.MetroComboBox metroComboBox10;
         private MetroFramework.Controls.MetroButton metroButton5;
         private System.Windows.Forms.TextBox textBox1;
-        private MetroFramework.Controls.MetroTextBox metroTextBox3;
         private MetroFramework.Controls.MetroButton metroButton4;
         private System.Windows.Forms.GroupBox groupBox3;
         private MetroFramework.Controls.MetroLabel metroLabel21;
@@ -1417,10 +1425,10 @@
         private MetroFramework.Controls.MetroLabel metroLabel15;
         private MetroFramework.Controls.MetroButton metroButton6;
         private MetroFramework.Controls.MetroButton metroButton7;
-        private MetroFramework.Controls.MetroCheckBox metroCheckBox7;
+        private MetroFramework.Controls.MetroCheckBox Ruch;
         private System.Windows.Forms.GroupBox groupBox4;
         private MetroFramework.Controls.MetroLabel metroLabel22;
-        private MetroFramework.Controls.MetroCheckBox metroCheckBox8;
+        private MetroFramework.Controls.MetroCheckBox Hex;
         private System.Windows.Forms.NumericUpDown numericUpDown2;
         private MetroFramework.Controls.MetroLabel metroLabel23;
         private MetroFramework.Controls.MetroGrid metroGrid1;
@@ -1442,6 +1450,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column8;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column9;
         private MetroFramework.Controls.MetroButton metroButton8;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
     }
 }
 
