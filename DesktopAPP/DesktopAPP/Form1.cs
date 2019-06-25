@@ -539,6 +539,16 @@ namespace DesktopAPP
         {
             metroContextMenu1.Enabled = state;
             metroButton1.Enabled = state;
+            numericUpDown2.Enabled = state;
+            metroTabControl1.Enabled = state;
+            metroComboBox5.Enabled = state;
+            metroComboBox6.Enabled = state;
+            metroComboBox7.Enabled = state;
+            metroComboBox8.Enabled = state;
+            metroComboBox9.Enabled = state;
+            metroTextBox2.Enabled = state;
+
+          
         }
 
         private void run_calculate()
