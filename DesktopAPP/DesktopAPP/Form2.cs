@@ -15,7 +15,7 @@ namespace DesktopAPP
     public partial class Form2 : MetroForm
     {
 
-        SQLiteConnection conn = new SQLiteConnection("Data Source=test.db;Version=3;");
+        SQLiteConnection conn = new SQLiteConnection("Data Source=info_exp.db;Version=3;");
         SQLiteCommand cmd = new SQLiteCommand();
         
         public Form2()
