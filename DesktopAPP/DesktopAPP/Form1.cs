@@ -206,6 +206,9 @@ namespace DesktopAPP
             while (re.Read())
             {
                 metroComboBox10.Items.Add(re.GetValue(0).ToString());
+                metroComboBox16.Items.Add(re.GetValue(0).ToString());
+                metroComboBox17.Items.Add(re.GetValue(0).ToString());
+                metroComboBox18.Items.Add(re.GetValue(0).ToString());
             }
 
             UpdataMena();
@@ -937,9 +940,49 @@ namespace DesktopAPP
             com_form.Show();
         }
 
+        private void metroComboBox17_MouseClick(object sender, MouseEventArgs e)
+        {
+            metroComboBox17.Items.Clear();
+            conn.Open();
+            SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
+            re = com_command.ExecuteReader();
+            while (re.Read())
+            {
+                metroComboBox17.Items.Add(re.GetValue(0).ToString());
+            }
+            conn.Close();
+        }
+
+        private void metroComboBox16_MouseClick(object sender, MouseEventArgs e)
+        {
+            metroComboBox16.Items.Clear();
+            conn.Open();
+            SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
+            re = com_command.ExecuteReader();
+            while (re.Read())
+            {
+                metroComboBox16.Items.Add(re.GetValue(0).ToString());
+
+            }
+            conn.Close();
+        }
+
+        private void metroComboBox18_MouseClick(object sender, MouseEventArgs e)
+        {
+            metroComboBox18.Items.Clear();
+            conn.Open();
+            SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
+            re = com_command.ExecuteReader();
+            while (re.Read())
+            {
+                metroComboBox18.Items.Add(re.GetValue(0).ToString());
+
+            }
+            conn.Close();
+        }
+
         private void metroComboBox10_MouseClick(object sender, MouseEventArgs e)
         {
-
             metroComboBox10.Items.Clear();
             conn.Open();
             SQLiteCommand com_command = new SQLiteCommand("select commands from Com_ports", conn);
@@ -947,6 +990,7 @@ namespace DesktopAPP
             while (re.Read())
             {
                 metroComboBox10.Items.Add(re.GetValue(0).ToString());
+
             }
             conn.Close();
         }
@@ -1009,16 +1053,7 @@ namespace DesktopAPP
                         textBox1.ForeColor = Color.Green;
                         textBox1.AppendText("Команда:"+ richTextBox1.Text + "\n");
 
-                    }
-                    else
-                    {
-
-                        dataOUT = metroComboBox10.Text;
-                        serialPort1.Write(dataOUT);
-                        textBox1.ForeColor = Color.Green;
-                        textBox1.AppendText("Команда:" + metroComboBox10.Text + "\n");
-
-                    }
+                    }                   
                 }
                 else            
                 {
@@ -1032,15 +1067,6 @@ namespace DesktopAPP
                             textBox1.AppendText("Команда:" + richTextBox1.Text.ToUpper()+"\n"); 
                             
                         }
-                         else
-                        {
-                            byte[] data = HexStringToByteArray(metroComboBox10.Text);
-                            serialPort1.Write(data, 0, data.Length);
-                            textBox1.ForeColor = Color.Green;
-                            textBox1.AppendText("Команда:" + metroComboBox10.Text.ToUpper()+"\n"); 
-                            
-                        }
-                       
                     }
                     catch (FormatException) { error = true; }
                     catch (ArgumentException) { error = true; }
@@ -1049,6 +1075,159 @@ namespace DesktopAPP
                 }
             }
         }
+
+        private void metroButton10_Click(object sender, EventArgs e)
+        {
+            bool error = false;
+            if (serialPort1.IsOpen)
+            {
+                if (Hex.Checked == true)
+                {
+                    try
+                    {
+                        if (Ruch.Checked == false)
+                        {
+                            byte[] data = HexStringToByteArray(metroComboBox17.Text);
+                            serialPort1.Write(data, 0, data.Length);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox17.Text.ToUpper() + "\n");
+                        }                    
+                    }
+                    catch (FormatException) { error = true; }
+                    catch (ArgumentException) { error = true; }
+
+                    if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + textBox1.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
+                else
+                {
+                        dataOUT = metroComboBox17.Text;
+                        serialPort1.Write(dataOUT);
+                        textBox1.ForeColor = Color.Green;
+                        textBox1.AppendText("Команда:" + metroComboBox17.Text + "\n");
+                    
+                }
+            }
+        }
+
+        private void metroButton9_Click(object sender, EventArgs e)
+        {
+            bool error = false;
+            if (serialPort1.IsOpen)
+            {
+                if (Hex.Checked == true)
+                {
+                    try
+                    {
+                        if (Ruch.Checked == false)
+                        {
+                            byte[] data = HexStringToByteArray(metroComboBox16.Text);
+                            serialPort1.Write(data, 0, data.Length);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox16.Text.ToUpper() + "\n");
+                        }
+                        else
+                        {
+                            dataOUT = metroComboBox16.Text;
+                            serialPort1.Write(dataOUT);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox16.Text + "\n");
+                        }
+                    }
+                    catch (FormatException) { error = true; }
+                    catch (ArgumentException) { error = true; }
+
+                    if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + textBox1.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
+                else
+                {
+                    dataOUT = metroComboBox17.Text;
+                    serialPort1.Write(dataOUT);
+                    textBox1.ForeColor = Color.Green;
+                    textBox1.AppendText("Команда:" + metroComboBox17.Text + "\n");
+
+                }
+            }
+        }
+
+        private void metroButton11_Click(object sender, EventArgs e)
+        {
+            bool error = false;
+            if (serialPort1.IsOpen)
+            {
+                if (Hex.Checked == true)
+                {
+                    try
+                    {
+                        if (Ruch.Checked == false)
+                        {
+                            byte[] data = HexStringToByteArray(metroComboBox18.Text);
+                            serialPort1.Write(data, 0, data.Length);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox18.Text.ToUpper() + "\n");
+                        }
+                        else
+                        {
+                            dataOUT = metroComboBox18.Text;
+                            serialPort1.Write(dataOUT);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox18.Text + "\n");
+                        }
+                    }
+                    catch (FormatException) { error = true; }
+                    catch (ArgumentException) { error = true; }
+
+                    if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + textBox1.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
+                else
+                {
+                    dataOUT = metroComboBox17.Text;
+                    serialPort1.Write(dataOUT);
+                    textBox1.ForeColor = Color.Green;
+                    textBox1.AppendText("Команда:" + metroComboBox17.Text + "\n");
+
+                }
+            }
+        }
+
+        private void metroButton12_Click(object sender, EventArgs e)
+        {
+            bool error = false;
+            if (serialPort1.IsOpen)
+            {
+                if (Hex.Checked == true)
+                {
+                    try
+                    {
+                        if (Ruch.Checked == false)
+                        {
+                            byte[] data = HexStringToByteArray(metroComboBox10.Text);
+                            serialPort1.Write(data, 0, data.Length);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox10.Text.ToUpper() + "\n");
+                        }
+                        else
+                        {
+                            dataOUT = metroComboBox10.Text;
+                            serialPort1.Write(dataOUT);
+                            textBox1.ForeColor = Color.Green;
+                            textBox1.AppendText("Команда:" + metroComboBox10.Text + "\n");
+                        }
+                    }
+                    catch (FormatException) { error = true; }
+                    catch (ArgumentException) { error = true; }
+
+                    if (error) MessageBox.Show(this, "Не правильно задана 16-ричная строка: " + textBox1.Text + "\n", "Format Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                }
+                else
+                {
+                    dataOUT = metroComboBox17.Text;
+                    serialPort1.Write(dataOUT);
+                    textBox1.ForeColor = Color.Green;
+                    textBox1.AppendText("Команда:" + metroComboBox17.Text + "\n");
+                }
+            }
+        }
+
 
         private byte[] HexStringToByteArray(string s)
         {
@@ -1088,23 +1267,39 @@ namespace DesktopAPP
             Thread.Sleep(500);
             int intBytes = serialPort1.BytesToRead;
             byte[] bytes = new byte[intBytes];
-
+            
             serialPort1.Read(bytes, 0, intBytes);
             string s = BitConverter.ToString(bytes);
             this.BeginInvoke(new LineReceivedEvent(LineReceived), s);
         }
 
-        
-
         private void metroCheckBox7_CheckedChanged(object sender, EventArgs e)
         {
             if (Ruch.Checked == true)
             {
-                metroComboBox10.Visible = false;
+                metroComboBox10.Enabled = false;
+                metroComboBox16.Enabled = false;
+                metroComboBox17.Enabled = false;
+                metroComboBox18.Enabled = false;
+                metroButton12.Enabled = false;
+                metroButton10.Enabled = false;
+                metroButton9.Enabled = false;
+                metroButton11.Enabled = false;
+                metroButton4.Enabled = true;
+                richTextBox1.Enabled = true;
             }
             else
             {
-                metroComboBox10.Visible = true;
+                metroComboBox10.Enabled = true;
+                metroComboBox16.Enabled = true;
+                metroComboBox17.Enabled = true;
+                metroComboBox18.Enabled = true;
+                metroButton12.Enabled = true;
+                metroButton10.Enabled = true;
+                metroButton9.Enabled = true;
+                metroButton11.Enabled = true;
+                metroButton4.Enabled = false;
+                richTextBox1.Enabled = false;
             }
         }
 
