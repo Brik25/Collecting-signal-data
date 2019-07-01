@@ -136,7 +136,11 @@ namespace DesktopAPP
             "insert into chast(idchast,znach_chast) values (1,2000);" +
             "insert into chast(idchast,znach_chast) values (2,3000);" +
             "insert into chast(idchast,znach_chast) values (3,4000);" +
-            "insert into chast(idchast,znach_chast) values (4,5000);";
+            "insert into chast(idchast,znach_chast) values (4,5000);"+
+            //COM-порт
+            "insert into Com_ports(id,commands) values (0,\"02 06 00 01 00 00 D8 39\");" +
+            "insert into Com_ports(id,commands) values (1,\"02 06 00 01 00 01 19 F9\");";
+
 
             cmd.CommandText = insert;
             cmd.ExecuteNonQuery();
