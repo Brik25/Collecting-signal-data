@@ -1,6 +1,6 @@
-# LCARD_E2010D
+# Collecting signal data
 
-## Function L-Card E20-10D
+## Desktop Application
 1. *Matlab Graphics*
 2. *Export Data*
 3. *Delete experience*
