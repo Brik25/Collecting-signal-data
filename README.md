@@ -1,4 +1,4 @@
-# Collecting signal data
+# Collecting signal data analog to digital converter
 
 ## Desktop Application
 1. *Matlab Graphics*
